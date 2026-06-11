@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인 - Refresh Beverage Mall</title>
+    <link rel="stylesheet" href="/stylesheets/style.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", "맑은 고딕", helvetica, sans-serif;
+            margin: 0; padding: 0;
+            background-color: #f8fafc;
+            color: #1e293b;
+            -webkit-font-smoothing: antialiased;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .top-utility-bar {
+            background-color: #0f172a;
+            color: #cbd5e1;
+            padding: 10px 60px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 20px;
+            font-size: 13px;
+        }
+        .user-welcome { font-weight: 500; color: #94a3b8; }
+        .top-link { color: #cbd5e1; text-decoration: none; transition: color 0.2s; }
+        .top-link:hover { color: #ffffff; }
+
+        .main-gnb-header {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 20px 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0; z-index: 100;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+        }
+        .brand-logo {
+            font-size: 24px; font-weight: 800; color: #0f172a; text-decoration: none;
+            display: flex; align-items: center; gap: 8px; letter-spacing: -0.5px;
+        }
+        .brand-logo span { color: #0ea5e9; }
+        .nav-menu-group { display: flex; gap: 45px; }
+        .nav-item { color: #475569; text-decoration: none; font-size: 16px; font-weight: 700; padding: 8px 0; transition: color 0.2s; }
+        .nav-item:hover { color: #0ea5e9; }
+
+        .login-contents-body { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 60px 20px; }
+        .login-card-box { background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 40px; width: 100%; max-width: 420px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); box-sizing: border-box; text-align: center; }
+        .login-card-box h2 { font-size: 24px; font-weight: 800; color: #0f172a; margin: 0 0 8px 0; letter-spacing: -0.5px; }
+        .login-sub-text { font-size: 14px; color: #64748b; margin-bottom: 30px; }
+
+        .form-group { margin-bottom: 16px; text-align: left; }
+        .form-group label { display: block; font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 6px; }
+        input[type="text"], input[type="password"], input[type="email"] { width: 100%; padding: 12px 14px; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background-color: #fff; color: #0f172a; transition: all 0.2s; }
+        input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus { outline: none; border-color: #0ea5e9; box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.12); }
+
+        .btn-login-submit { width: 100%; background-color: #0f172a; color: white; padding: 14px; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: background-color 0.2s, transform 0.1s; }
+        .btn-login-submit:hover { background-color: #1e293b; }
+
+        .login-helper-zone { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #f1f5f9; font-size: 13px; }
+        .helper-links-row { display: flex; justify-content: center; gap: 15px; color: #cbd5e1; }
+        .helper-links-row a { color: #64748b; text-decoration: none; font-weight: 500; }
+        .helper-links-row a:hover { color: #0f172a; text-decoration: underline; }
+        .register-guide { margin-top: 5px; color: #475569; }
+        .link-register { color: #0ea5e9; text-decoration: none; font-weight: 700; }
+        .link-register:hover { text-decoration: underline; }
+
+        /* 💡 일반 쇼핑몰 규격의 깔끔한 모달 레이어 팝업 CSS */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.4); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-box { background-color: #ffffff; border-radius: 12px; width: 90%; max-width: 380px; padding: 30px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); box-sizing: border-box; position: relative; }
+        .modal-title { font-size: 18px; font-weight: 800; color: #0f172a; margin: 0 0 20px 0; text-align: left; }
+        .btn-modal-close { position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 20px; color: #94a3b8; cursor: pointer; }
+        .btn-modal-close:hover { color: #475569; }
+        .btn-find-submit { width: 100%; background-color: #0f172a; color: white; padding: 12px; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 8px; }
+        .btn-find-submit:hover { background-color: #1e293b; }
+
+        .mall-footer-layer { background-color: #0f172a; color: #94a3b8; padding: 40px 60px; text-align: center; font-size: 14px; border-top: 1px solid #1e293b; }
+    </style>
+</head>
+<body>
+
+<div class="top-utility-bar">
+    <span class="user-welcome">방문객님 환영합니다!</span>
+    <a href="/user/login" class="top-link font-bold" style="color: #0ea5e9;">로그인</a>
+    <a href="/user/register" class="top-link">회원가입</a>
+</div>
+
+<header class="main-gnb-header">
+    <a href="/" class="brand-logo">Refresh <span>Beverage</span></a>
+    <nav class="nav-menu-group">
+        <a href="/" class="nav-item">홈</a>
+        <a href="/products" class="nav-item">상품목록</a>
+        <a href="/cart" class="nav-item">장바구니</a>
+        <a href="/board" class="nav-item">고객센터</a>
+    </nav>
+</header>
+
+<div class="login-contents-body">
+    <div class="login-card-box">
+        <h2>로그인</h2>
+        <p class="login-sub-text">Refresh Beverage Mall에 오신 것을 환영합니다.</p>
+
+        <form action="/user/login" method="post" target="_self">
+            <div class="form-group">
+                <label for="username">아이디</label>
+                <input type="text" id="username" name="username" placeholder="아이디를 입력하세요" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">비밀번호</label>
+                <input type="password" id="password" name="password" placeholder="비밀번호를 입력하세요" required>
+            </div>
+
+            <button type="submit" class="btn-login-submit">로그인</button>
+        </form>
+
+        <div class="login-helper-zone">
+            <div class="helper-links-row">
+                <a href="javascript:void(0);" onclick="showModal('id')">아이디 찾기</a>
+                <span>|</span>
+                <a href="javascript:void(0);" onclick="showModal('pwd')">비밀번호 찾기</a>
+                <span>|</span>
+                <a href="/">홈으로</a>
+            </div>
+            <div class="register-guide">
+                아직 회원이 아니신가요? <a href="/user/register" class="link-register">회원가입</a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="modal-overlay" id="modalFindId">
+    <div class="modal-box">
+        <button class="btn-modal-close" onclick="closeModal('id')">&times;</button>
+        <div class="modal-title">아이디 찾기</div>
+        <form action="/user/find-id" method="POST">
+            <div class="form-group">
+                <label>이름</label>
+                <input type="text" name="name" placeholder="이름을 입력하세요" required>
+            </div>
+            <div class="form-group">
+                <label>이메일</label>
+                <input type="email" name="email" placeholder="이메일을 입력하세요" required>
+            </div>
+            <button type="submit" class="btn-find-submit">아이디 찾기</button>
+        </form>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modalFindPwd">
+    <div class="modal-box">
+        <button class="btn-modal-close" onclick="closeModal('pwd')">&times;</button>
+        <div class="modal-title">비밀번호 찾기</div>
+        <form action="/user/find-pwd" method="POST">
+            <div class="form-group">
+                <label>아이디</label>
+                <input type="text" name="username" placeholder="아이디를 입력하세요" required>
+            </div>
+            <div class="form-group">
+                <label>이름</label>
+                <input type="text" name="name" placeholder="이름을 입력하세요" required>
+            </div>
+            <div class="form-group">
+                <label>이메일</label>
+                <input type="email" name="email" placeholder="이메일을 입력하세요" required>
+            </div>
+            <button type="submit" class="btn-find-submit">임시 비밀번호 발급</button>
+        </form>
+    </div>
+</div>
+
+<footer class="mall-footer-layer">
+    <p>&copy; 2026 Refresh Beverage Mall. All rights reserved.</p>
+</footer>
+
+<script>
+    function showModal(type) {
+        if (type === 'id') {
+            document.getElementById('modalFindId').style.display = 'flex';
+        } else if (type === 'pwd') {
+            document.getElementById('modalFindPwd').style.display = 'flex';
+        }
+    }
+
+    function closeModal(type) {
+        if (type === 'id') {
+            document.getElementById('modalFindId').style.display = 'none';
+        } else if (type === 'pwd') {
+            document.getElementById('modalFindPwd').style.display = 'none';
+        }
+    }
+
+    // 모달 바깥 어두운 배경 클릭 시 닫히는 기능 추가
+    window.onclick = function(event) {
+        const modalId = document.getElementById('modalFindId');
+        const modalPwd = document.getElementById('modalFindPwd');
+        if (event.target == modalId) {
+            modalId.style.display = 'none';
+        }
+        if (event.target == modalPwd) {
+            modalPwd.style.display = 'none';
+        }
+    }
+</script>
+
+</body>
+</html>

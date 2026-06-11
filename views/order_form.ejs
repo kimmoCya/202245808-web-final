@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>주문 및 결제하기</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif; padding: 40px; background-color: #f4f6fa; color: #334155; }
+        .order-container { max-width: 600px; margin: 0 auto; background: white; padding: 35px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.03); }
+        h2 { font-size: 20px; font-weight: 700; margin-top: 0; margin-bottom: 25px; border-left: 5px solid #2563eb; padding-left: 12px; color: #1e293b; }
+        .section-title { font-size: 14px; font-weight: 600; color: #64748b; text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-top: 25px; }
+        .user-info-box { background-color: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 25px; font-size: 14px; line-height: 1.8; }
+
+        /* 주소 및 요청사항 입력 필드 스타일 */
+        .form-input-group { margin-bottom: 12px; }
+        .form-input-group label { display: block; font-weight: 600; color: #475569; margin-bottom: 4px; }
+        .txt-input { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 14px; background-color: #fff; }
+        .txt-input:focus { outline: none; border-color: #2563eb; }
+
+        .item-list { list-style: none; padding: 0; margin: 0 0 25px 0; }
+        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px dashed #e2e8f0; font-size: 14px; }
+
+        /* 결제 수단 선택 라디오 박스 뷰 */
+        .pay-method-group { display: flex; gap: 15px; margin-top: 10px; margin-bottom: 20px; }
+        .pay-method-label { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; background: #f8fafc; transition: all 0.2s; }
+        .pay-method-group input[type="radio"] { margin: 0; cursor: pointer; }
+        .pay-method-group input[type="radio"]:checked + span { color: #2563eb; }
+
+        /* 세부 영수증 정산 테이블 내역 */
+        .receipt-summary-box { background-color: #f8fafc; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
+        .receipt-line { display: flex; justify-content: space-between; font-size: 14px; color: #475569; margin-bottom: 8px; }
+        .receipt-line:last-of-type { margin-bottom: 0; }
+
+        .price-summary { display: flex; justify-content: space-between; align-items: center; background-color: #eff6ff; padding: 18px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #bfdbfe; }
+        .total-label { font-size: 15px; font-weight: bold; color: #1e40af; }
+        .total-amount { font-size: 20px; font-weight: 800; color: #2563eb; }
+        .btn-checkout { background-color: #2563eb; color: white; border: none; padding: 16px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; width: 100%; box-shadow: 0 4px 6px rgba(37, 99, 235, 0.15); transition: background 0.2s; }
+        .btn-checkout:hover { background-color: #1d4ed8; }
+        .btn-cancel { display: block; text-align: center; margin-top: 18px; color: #94a3b8; text-decoration: none; font-size: 13px; }
+        .btn-cancel:hover { color: #64748b; text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<div class="order-container">
+    <h2>주문서 작성 / 안전 결제</h2>
+
+    <form action="/order/checkout" method="post" onsubmit="return confirm('최종 금액과 배송 정보를 확인하였으며 결제를 승인하시겠습니까?')">
+
+        <div class="section-title">주문 고객 정보</div>
+        <div class="user-info-box">
+            <div style="margin-bottom: 12px;">
+                <strong>주문자:</strong> <%= user.name %> (<%= user.username %>)
+            </div>
+            <div class="form-input-group">
+                <label>연락처</label>
+                <input type="text" name="phone" class="txt-input" value="<%= user.phone || '' %>" placeholder="연락처를 입력하세요" required>
+            </div>
+            <div class="form-input-group">
+                <label>배송지 주소</label>
+                <input type="text" name="address" class="txt-input" value="<%= user.address || '' %>" placeholder="배송 주소를 입력하세요" required>
+            </div>
+            <div class="form-input-group" style="margin-bottom: 0;">
+                <label>배송 요청사항</label>
+                <input type="text" name="orderComment" class="txt-input" placeholder="문 앞에 놓아주세요, 배송 전 연락바랍니다 등">
+            </div>
+        </div>
+
+        <div class="section-title">결제 대상 상품 내역</div>
+        <ul class="item-list">
+            <% orderItems.forEach(item => { %>
+                <li class="item-row">
+                    <div>
+                        <strong><%= item.name %></strong>
+                        <span style="color: #94a3b8; font-size: 12px;">(x<%= item.quantity %>개)</span>
+                    </div>
+                    <span style="font-weight: 500;">₩<%= item.total.toLocaleString() %></span>
+                </li>
+            <% }) %>
+        </ul>
+
+        <div class="section-title">결제 수단 선택</div>
+        <div class="pay-method-group">
+            <label class="pay-method-label">
+                <input type="radio" name="paymentMethod" value="card" checked>
+                <span>신용/체크카드</span>
+            </label>
+            <label class="pay-method-label">
+                <input type="radio" name="paymentMethod" value="vbank">
+                <span>무통장입금</span>
+            </label>
+            <label class="pay-method-label">
+                <input type="radio" name="paymentMethod" value="easypay">
+                <span>간편결제</span>
+            </label>
+        </div>
+
+        <div class="section-title">결제 금액 세부 내역</div>
+        <div class="receipt-summary-box">
+            <div class="receipt-line">
+                <span>총 상품 금액</span>
+                <span>₩<%= totalPrice.toLocaleString() %></span>
+            </div>
+            <div class="receipt-line">
+                <span>배송비</span>
+                <span>₩0 (무료배송)</span>
+            </div>
+        </div>
+
+        <div class="price-summary">
+            <span class="total-label">최종 결제 금액</span>
+            <span class="total-amount">₩<%= totalPrice.toLocaleString() %></span>
+        </div>
+
+        <button type="submit" class="btn-checkout">₩<%= totalPrice.toLocaleString() %> 결제하기</button>
+    </form>
+
+    <a href="/cart" class="btn-cancel">결제 취소하고 장바구니로 돌아가기</a>
+</div>
+
+</body>
+</html>

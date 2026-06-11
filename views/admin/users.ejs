@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 센터 - 회원 관리</title>
+    <link rel="stylesheet" href="/stylesheets/style.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", "맑은 고딕", sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            margin: 0; padding: 40px 20px;
+        }
+        .admin-container {
+            max-width: 1300px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+        }
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #0f172a;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .admin-header h2 {
+            font-size: 24px;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0;
+        }
+        .btn-back {
+            color: #475569;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+        .btn-back:hover {
+            color: #0f172a;
+            text-decoration: underline;
+        }
+
+        /* 테이블 정밀 스타일링 */
+        .member-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 14px;
+        }
+        .member-table th {
+            background-color: #f1f5f9;
+            color: #475569;
+            font-weight: 700;
+            padding: 16px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .member-table td {
+            padding: 16px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+            color: #334155;
+        }
+        .member-table tr:hover td {
+            background-color: #f8fafc;
+        }
+
+        .username-text {
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        /* 상태 배지 시스템 */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 700;
+            text-align: center;
+        }
+        .status-badge.active {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        .status-badge.withdrawn {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* 셀렉트 박스 및 UI 버튼 */
+        .select-role {
+            padding: 6px 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #334155;
+            background-color: #fff;
+        }
+        .btn-apply {
+            background-color: #fff;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-apply:hover {
+            background-color: #f8fafc;
+            border-color: #94a3b8;
+        }
+        .btn-delete {
+            background-color: #fff;
+            color: #dc2626;
+            border: 1px solid #fee2e2;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-delete:hover {
+            background-color: #fee2e2;
+            border-color: #fca5a5;
+        }
+        .text-master {
+            font-size: 13px;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
+        .admin-footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+
+<div class="admin-container">
+    <div class="admin-header">
+        <h2>쇼핑몰 가입 회원 명부</h2>
+        <a href="/admin" class="btn-back">대시보드로 복귀</a>
+    </div>
+
+    <table class="member-table">
+        <thead>
+        <tr>
+            <th style="width: 10%;">회원번호</th>
+            <th style="width: 15%;">아이디</th>
+            <th style="width: 15%;">이름</th>
+            <th style="width: 18%;">연락처</th>
+            <th style="width: 12%;">상태</th>
+            <th style="width: 18%;">권한 변경</th>
+            <th style="width: 12%;">강제 관리</th>
+        </tr>
+        </thead>
+        <tbody>
+        <% if (typeof users !== 'undefined' && users.length > 0) { %>
+            <% users.forEach(member => { %>
+                <tr>
+                    <td>#<%= member.id %></td>
+                    <td class="username-text"><%= member.username %></td>
+                    <td><%= member.name %></td>
+                    <td><%= member.phone || '-' %></td>
+                    <td>
+                        <% if (member.is_withdrawn === 1) { %>
+                            <span class="status-badge withdrawn">탈퇴</span>
+                        <% } else { %>
+                            <span class="status-badge active">정상</span>
+                        <% } %>
+                    </td>
+                    <td>
+                        <% if (member.role === 'ADMIN') { %>
+                            <select class="select-role" disabled>
+                                <option>관리자 (ADMIN)</option>
+                            </select>
+                        <% } else { %>
+                            <form action="/admin/user/update-role" method="POST" style="display: flex; gap: 6px; margin: 0;">
+                                <input type="hidden" name="userId" value="<%= member.id %>">
+                                <select name="role" class="select-role">
+                                    <option value="USER" <%= member.role === 'USER' ? 'selected' : '' %>>일반 회원</option>
+                                    <option value="VIP" <%= member.role === 'VIP' ? 'selected' : '' %>>VIP 회원</option>
+                                </select>
+                                <button type="submit" class="btn-apply">적용</button>
+                            </form>
+                        <% } %>
+                    </td>
+                    <td>
+                        <% if (member.role === 'ADMIN') { %>
+                            <span class="text-master">마스터 계정</span>
+                        <% } else { %>
+                            <form action="/admin/user/kick" method="POST" onsubmit="return confirm('<%= member.name %> 회원을 강제 탈퇴 처리하시겠습니까?')" style="margin: 0;">
+                                <input type="hidden" name="userId" value="<%= member.id %>">
+                                <button type="submit" class="btn-delete">강제 탈퇴</button>
+                            </form>
+                        <% } %>
+                    </td>
+                </tr>
+            <% }) %>
+        <% } else { %>
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 40px 0; color: #94a3b8;">가입된 회원이 존재하지 않습니다.</td>
+            </tr>
+        <% } %>
+        </tbody>
+    </table>
+
+    <div class="admin-footer">
+        &copy; 2026 시스템 관리 센터. All rights reserved.
+    </div>
+</div>
+
+</body>
+</html>

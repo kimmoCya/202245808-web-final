@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>전체 상품 목록 - Refresh Beverage Mall</title>
+    <link rel="stylesheet" href="/stylesheets/style.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", "맑은 고딕", helvetica, sans-serif;
+            margin: 0; padding: 0;
+            background-color: #f8fafc;
+            color: #1e293b;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .top-utility-bar {
+            background-color: #0f172a;
+            color: #cbd5e1;
+            padding: 10px 60px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 20px;
+            font-size: 13px;
+        }
+        .user-welcome {
+            font-weight: 500;
+            color: #94a3b8;
+        }
+        .user-welcome strong {
+            color: #38bdf8;
+        }
+        .top-link {
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .top-link:hover {
+            color: #ffffff;
+        }
+        .badge-admin {
+            background-color: #ef4444;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .main-gnb-header {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 20px 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+        }
+        .brand-logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: #0f172a;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: -0.5px;
+        }
+        .brand-logo span {
+            color: #0ea5e9;
+        }
+        .nav-menu-group {
+            display: flex;
+            gap: 45px;
+        }
+        .nav-item {
+            color: #475569;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 700;
+            padding: 8px 0;
+            position: relative;
+            transition: color 0.2s;
+        }
+        .nav-item:hover, .nav-item.active {
+            color: #0ea5e9;
+        }
+
+        .mall-contents-body {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 40px 60px;
+        }
+
+        .section-headline-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-bottom: 2px solid #0f172a;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+        .section-headline-bar h3 {
+            font-size: 24px;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0;
+        }
+        .item-count-text {
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .shopping-item-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 25px;
+            margin-top: 20px;
+        }
+        .shopping-card-box {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .shopping-card-box:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.08);
+            border-color: #cbd5e1;
+        }
+        .card-img-wrapper {
+            width: 100%;
+            height: 220px;
+            background-color: #f1f5f9;
+            overflow: hidden;
+            position: relative;
+        }
+        .card-img-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+
+        .card-info-content {
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+        }
+        .card-info-content h4 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0 0 6px 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .card-price-line {
+            margin-top: auto;
+            font-size: 18px;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 15px;
+        }
+
+        .card-btn-group {
+            display: flex;
+            gap: 6px;
+        }
+        .btn-action-cart {
+            flex-grow: 1;
+            background-color: #0f172a;
+            color: white;
+            border: none;
+            padding: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .btn-action-cart:hover {
+            background-color: #1e293b;
+        }
+        .btn-action-wish {
+            background-color: #fff;
+            color: #cbd5e1;
+            border: 1px solid #e2e8f0;
+            padding: 10px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-action-wish:hover {
+            border-color: #fda4af;
+            color: #f43f5e;
+            background-color: #fff1f2;
+        }
+
+        .back-to-list-zone {
+            text-align: center;
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 1px solid #e2e8f0;
+        }
+        .link-back-main {
+            color: #0ea5e9;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 15px;
+        }
+        .link-back-main:hover {
+            text-decoration: underline;
+        }
+
+        .mall-footer-layer {
+            background-color: #0f172a;
+            color: #94a3b8;
+            padding: 40px 60px;
+            margin-top: 100px;
+            text-align: center;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="top-utility-bar">
+    <% if (user) { %>
+        <span class="user-welcome">안녕하세요, <strong><%= user.username %></strong>님!</span>
+        <% if (user.role === 'ADMIN') { %>
+            <a href="/admin" class="top-link font-bold"><span class="badge-admin">ADMIN</span> 관리실</a>
+        <% } %>
+        <a href="/mypage" class="top-link">마이페이지</a>
+        <a href="/user/logout" class="top-link" style="color: #f43f5e;">로그아웃</a>
+    <% } else { %>
+        <span class="user-welcome">방문객님 환영합니다!</span>
+        <a href="/user/login" class="top-link">로그인</a>
+        <a href="/user/register" class="top-link">회원가입</a>
+    <% } %>
+</div>
+
+<header class="main-gnb-header">
+    <a href="/" class="brand-logo">Refresh <span>Beverage</span></a>
+    <nav class="nav-menu-group">
+        <a href="/" class="nav-item">홈</a>
+        <a href="/products" class="nav-item active">상품목록</a>
+        <a href="/cart" class="nav-item">장바구니</a>
+        <a href="/board" class="nav-item">고객센터</a>
+    </nav>
+</header>
+
+<div class="mall-contents-body">
+
+    <section>
+        <div class="section-headline-bar">
+            <h3>📦 전체 상품 목록</h3>
+            <span class="item-count-text">총 <%= products.length %>개의 상품이 진열되어 있습니다.</span>
+        </div>
+
+        <div class="shopping-item-grid">
+            <% products.forEach(product => { %>
+                <div class="shopping-card-box">
+                    <div class="card-img-wrapper">
+                        <img src="/images/<%= product.image || 'default.png' %>" alt="<%= product.name %>">
+                    </div>
+                    <div class="card-info-content">
+                        <h4><%= product.emoji || '🥤' %> <%= product.name %></h4>
+                        <div class="card-price-line">
+                            ₩<%= product.price.toLocaleString() %>
+                        </div>
+
+                        <div class="card-btn-group">
+                            <form action="/cart/add" method="POST" style="margin:0; flex-grow:1;">
+                                <input type="hidden" name="productId" value="<%= product.id %>">
+                                <button type="submit" class="btn-action-cart">🛒 장바구니</button>
+                            </form>
+                            <form action="/wishlist/add" method="POST" style="margin:0;">
+                                <input type="hidden" name="productId" value="<%= product.id %>">
+                                <button type="submit" class="btn-action-wish">❤️</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+
+        <div class="back-to-list-zone">
+            <a href="/products" class="link-back-main">← 상품 목록 홈으로 돌아가기</a>
+        </div>
+    </section>
+</div>
+
+<footer class="mall-footer-layer">
+    <p>&copy; 2026 Refresh Beverage Mall. All rights reserved.</p>
+</footer>
+
+</body>
+</html>
