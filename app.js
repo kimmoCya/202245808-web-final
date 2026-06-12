@@ -109,14 +109,10 @@ app.use((req, res, next) => {
 // ✨ [실습 서버 멀티유저 인프라 자동화 세팅]
 // ==========================================
 
-// 1. 현재 리눅스 로그인 계정명(stud2, stud19 등)을 자동으로 인식합니다.
 const currentStudent = process.env.USER || '';
 const isServerEnvironment = currentStudent.startsWith('stud');
 
-// 2. 서버 환경이면 '/stud2', 로컬 PC 환경이면 기존대로 ''(빈값)이 기본 주소가 됩니다.
-const basePath = isServerEnvironment ? `/${currentStudent}` : '';
-
-// 3. 계정 번호에 맞춰서 포트 자동 연산 (stud2 -> 3002, stud19 -> 3019)
+// 포트 자동 연산 (stud19 -> 3019)
 let defaultPort = '3000';
 if (isServerEnvironment) {
     const match = currentStudent.match(/stud(\d+)/);
@@ -127,19 +123,32 @@ if (isServerEnvironment) {
 const port = normalizePort(process.env.PORT || defaultPort);
 app.set('port', port);
 
-// 4. 모든 라우터에 자동으로 계정별 basePath(/stud2 등)를 동적으로 주입합니다.
-app.use(basePath + '/', indexRouter);
-app.use(basePath + '/users', usersRouter);
-app.use(basePath + '/user', userRouter);
-app.use(basePath + '/board', boardRouter);
-app.use(basePath + '/products', productRouter);
-app.use(basePath + '/cart', cartRouter);
-app.use(basePath + '/order', orderRouter);
-app.use(basePath + '/mypage', mypageRouter);
-app.use(basePath + '/wishlist', wishlistRouter);
-app.use(basePath + '/admin', adminRouter);
+// ⭕ [404 해결의 핵심 가드 미들웨어]
+// Nginx가 주소창 맨 앞에 붙여서 던지는 /stud19, /stud02 등의 경로 계정 토큰을
+// Express 라우터가 오해하지 않고 하위 스코프로 흘려보내도록 내부 req.url 구조를 정규화합니다.
+app.use((req, res, next) => {
+    const parts = req.url.split('/').filter(Boolean);
+    // 주소창 첫 경로가 리눅스 계정명 패턴(stud숫자 등)이거나 프로젝트 라우터 키워드가 아니라면 베이스 경로로 인정하고 치환
+    if (parts.length > 0 && !['user', 'board', 'products', 'cart', 'order', 'mypage', 'wishlist', 'admin', 'users'].includes(parts[0])) {
+        // 원래 요청 주소에서 계정명 세그먼트를 제거하여 매핑 무결성 확보
+        req.url = '/' + parts.slice(1).join('/');
+    }
+    next();
+});
 
-app.get(basePath + '/login', (req, res) => { res.redirect(`${basePath}/user/login`); });
+// ⭕ 모든 환경(로컬 PC, 우분투 계정 구분 없이)에서 완벽히 연동되도록 멀티 라우팅 패스를 정의합니다.
+app.use('/', indexRouter);
+app.use('/users', usersRouter);
+app.use('/user', userRouter);
+app.use('/board', boardRouter);
+app.use('/products', productRouter);
+app.use('/cart', cartRouter);
+app.use('/order', orderRouter);
+app.use('/mypage', mypageRouter);
+app.use('/wishlist', wishlistRouter);
+app.use('/admin', adminRouter);
+
+app.get('/login', (req, res) => { res.redirect('user/login'); });
 
 // 404 및 에러 핸들러
 app.use(function(req, res, next) { next(createError(404)); });
@@ -150,14 +159,14 @@ app.use(function(err, req, res, next) {
     res.render('error');
 });
 
-// 5. 서버 진짜 구동하기 (listen 코드 내장)
+// 서버 진짜 구동하기 (listen 코드 내장)
 const server = http.createServer(app);
 server.listen(port, () => {
     console.log(`\n==================================================`);
-    console.log(`[*] 학과 실습 서버 멀티유저 라우팅 맵핑 완료!`);
+    console.log(`[*] 학과 실습 서버 멀티유저 라우팅 유연화 세팅 완료!`);
     console.log(`[*] 현재 실행 계정: ${currentStudent || '로컬 PC 개발 환경'}`);
     console.log(`[*] 오픈된 포트: ${port}번`);
-    console.log(`[*] 접속 테스트 주소: http://10.125.234.122${basePath || ':3000'}`);
+    console.log(`[*] 접속 테스트 주소: http://10.125.234.122/${currentStudent || ''}`);
     console.log(`==================================================\n`);
 });
 
