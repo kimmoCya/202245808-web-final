@@ -13,15 +13,16 @@ function isAdmin(req, res, next) {
     if (user && user.role === 'ADMIN') {
         next();
     } else {
-        // ⭕ [교정] 주소창 깊이가 깊어지므로 상위 계층 밖의 로그인 페이지로 안전하게 유도 (../user/login)
+        // ⭕ [교정] 권한 부족 시 상위 계층 밖의 로그인 페이지로 정확히 유도
         res.send('<script>alert("관리자 권한이 필요합니다."); location.href="../user/login";</script>');
     }
 }
 
-// 1. 기존 /admin 으로 들어오면 자동으로 /admin/dashboard 로 리다이렉트 시켜줍니다.
+// 1. 기존 /admin 으로 들어오면 자동으로 /admin/dashboard 로 안전하게 포워딩합니다.
 router.get('/', isAdmin, (req, res) => {
-    // ⭕ [핵심 교정] 주소창 명시적 고정: /admin -> /admin/dashboard 이동 (슬래시 없이 파일명처럼 이동)
-    res.redirect('admin/dashboard');
+    // ⭕ [버그 해결 핵심] 중복 매핑 탈출 가드: 슬래시를 붙이거나 덧붙이지 않고,
+    // /admin 스코프 바로 뒤에 결합되도록 상대 디렉터리 경로 파일명 지정 방식으로 명시적 리다이렉트합니다.
+    res.redirect('./admin/dashboard');
 });
 
 // 2. 진짜 관리자 통제실 메인 화면 (주소창: /admin/dashboard -> 3단계 깊이 완벽 고정)
@@ -58,7 +59,7 @@ router.post('/products/new', isAdmin, (req, res) => {
 
     db.run(query, [name, price, emoji, description, image, status || '일반'], function(err) {
         if (err) return res.status(500).send('상품 등록 실패');
-        // ⭕ [교정] 주소창이 4단계 깊이이므로, 한 단계 위인 상품 목록 스코프(../products)로 복귀
+        // ⭕ [교정] 주소창이 4단계 깊이이므로, 한 단계 위인 상품 목록 스코프(../products)로 안전 회군
         res.send('<script>alert("신규 상품이 등록되었습니다."); location.href="../products";</script>');
     });
 });
@@ -80,7 +81,7 @@ router.post('/products/edit/:id', isAdmin, (req, res) => {
 
     db.run(query, [name, price, emoji, description, image, status, productId], (err) => {
         if (err) return res.status(500).send('상품 정보 수정 실패');
-        // ⭕ [교정] 주소창: 5단계 구조 -> 두 단계 위인 상품 목록 스코프(../../products)로 탈출 복귀
+        // ⭕ [교정] 주소창: 5단계 구조 -> 두 단계 위인 상품 목록 스코프(../../products)로 완전 탈출
         res.send('<script>alert("상품 정보가 수정되었습니다."); location.href="../../products";</script>');
     });
 });

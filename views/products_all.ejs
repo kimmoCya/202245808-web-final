@@ -286,7 +286,7 @@
                                 <input type="hidden" name="productId" value="<%= product.id %>">
                                 <button type="submit" class="btn-action-cart">🛒 장바구니</button>
                             </form>
-                            <form action="../wishlist/add" method="POST" style="margin:0;">
+                            <form action="/wishlist/add" method="POST" style="margin:0;">
                                 <input type="hidden" name="productId" value="<%= product.id %>">
                                 <button type="submit" class="btn-action-wish">❤️</button>
                             </form>
@@ -297,7 +297,7 @@
         </div>
 
         <div class="back-to-list-zone">
-            <a href="./" class="link-back-main">← 상품 목록 홈으로 돌아가기</a>
+            <a href="../" class="link-back-main">← 상품 목록 홈으로 돌아가기</a>
         </div>
     </section>
 </div>
