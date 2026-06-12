@@ -54,6 +54,7 @@ router.post('/login', (req, res) => {
 
         if (match) {
             if (user.is_withdrawn === 1) {
+                // 🚩 탈퇴 유저 감지 시 재가입 뷰 출력
                 return res.render('user_rejoin', { username: user.username });
             }
 
@@ -95,6 +96,7 @@ router.post('/rejoin-submit', async (req, res) => {
                     phone: refreshedUser.phone,
                     address: refreshedUser.address
                 };
+                // 🚩 [보정] /user/rejoin-submit 위치에서 상위 컨텍스트 루트(.../stud19/)로 안전하게 탈출 리다이렉트
                 return res.redirect('../');
             }
             res.redirect('login');
@@ -193,8 +195,22 @@ router.post('/find-id', (req, res) => {
 
     db.get('SELECT username FROM users WHERE name = ? AND email = ? AND is_withdrawn = 0', [name, email], (err, row) => {
         if (err) return res.status(500).send('DB 오류');
-        if (!row) return res.status(404).send('일치하는 회원 정보가 없습니다.');
-        res.redirect('login');
+        if (!row) {
+            return res.send(`
+                <script>
+                    alert('일치하는 회원 정보가 없습니다.');
+                    location.href = 'login';
+                </script>
+            `);
+        }
+
+        // 🚩 [핵심 복구] 찾은 아이디를 브라우저 알림창(alert)으로 확실하게 띄워줌
+        res.send(`
+            <script>
+                alert('가입하신 아이디는 [ ${row.username} ] 입니다.');
+                location.href = 'login';
+            </script>
+        `);
     });
 });
 
@@ -204,14 +220,28 @@ router.post('/find-pwd', (req, res) => {
 
     db.get('SELECT id FROM users WHERE username = ? AND name = ? AND email = ? AND is_withdrawn = 0', [username, name, email], async (err, row) => {
         if (err) return res.status(500).send('DB 오류');
-        if (!row) return res.status(404).send('일치하는 회원 정보가 없습니다.');
+        if (!row) {
+            return res.send(`
+                <script>
+                    alert('일치하는 회원 정보가 없습니다.');
+                    location.href = 'login';
+                </script>
+            `);
+        }
 
         const tempPassword = Math.random().toString(36).slice(-8);
         const hashedTempPassword = await bcrypt.hash(tempPassword, 10);
 
         db.run('UPDATE users SET password = ? WHERE id = ?', [hashedTempPassword, row.id], (updateErr) => {
             if (updateErr) return res.status(500).send('임시 비밀번호 발급 실패');
-            res.redirect('login');
+
+            // 🚩 [핵심 복구] 발급된 임시 비밀번호를 알림창(alert)으로 완벽하게 노출
+            res.send(`
+                <script>
+                    alert('임시 비밀번호가 발급되었습니다.\\n로그인 후 즉시 변경해 주세요.\\n\\n임시 비밀번호: ${tempPassword}');
+                    location.href = 'login';
+                </script>
+            `);
         });
     });
 });
