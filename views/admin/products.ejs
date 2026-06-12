@@ -182,7 +182,7 @@
         if(newStatus === '메인 추천 노출중') selectElement.classList.add('featured');
         else selectElement.classList.remove('featured');
 
-        // 주소창: .../stud19/admin/products 에서 admin.js의 router.post('/products/edit/:id') 호출
+        // 경로 검증: fetch 내의 비동기 요청 경로가 절대경로가 아닌 상대경로 'products/edit/' 로 이상 없음 확인
         fetch('products/edit/' + productId, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -196,7 +196,7 @@
 
     function deleteProduct(productId) {
         if (confirm('이 음료 상품을 대장에서 즉시 삭제하시겠습니까?')) {
-            // 주소창: .../stud19/admin/products 에서 admin.js의 router.post('/products/delete/:id') 호출
+            // 경로 검증: fetch 내의 비동기 삭제 경로가 절대경로가 아닌 상대경로 'products/delete/' 로 이상 없음 확인
             fetch('products/delete/' + productId, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' }

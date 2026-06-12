@@ -319,7 +319,6 @@
 </head>
 <body>
 
-<!-- 주소창: .../stud19/ (1단계 최상위 메인 홈 스코프) -->
 <div class="top-utility-bar">
     <% if (typeof user !== 'undefined' && user) { %>
         <span class="user-welcome">안녕하세요, <strong><%= user.username %></strong>님!</span>
@@ -379,12 +378,10 @@
                             </div>
 
                             <div class="card-btn-group">
-                                <!-- 주소창 / 에서 cart.js의 router.post('/') 엔드포인트 호출 (1단계 유지 상대매핑) -->
                                 <form action="cart/add" method="POST" style="margin:0; flex-grow:1;">
                                     <input type="hidden" name="productId" value="<%= product.id %>">
                                     <button type="submit" class="btn-action-cart">🛒 장바구니</button>
                                 </form>
-                                <!-- 주소창 / 에서 wishlist.js의 router.post('/add') 엔드포인트 호출 -->
                                 <form action="wishlist/add" method="POST" style="margin:0;">
                                     <input type="hidden" name="productId" value="<%= product.id %>">
                                     <button type="submit" class="btn-action-wish">❤️</button>
@@ -400,7 +397,7 @@
             <% } %>
         </div>
     </section>
-</div>
+</div
 
 <footer class="mall-footer-layer">
     <p>&copy; 2026 Refresh Beverage Mall. All rights reserved.</p>
