@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
@@ -6,6 +8,7 @@ const logger = require('morgan');
 const session = require('express-session');
 const sqlite3 = require('sqlite3').verbose();
 const bcrypt = require('bcrypt');
+const http = require('http');
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
@@ -18,6 +21,7 @@ const mypageRouter = require('./routes/mypage');
 const wishlistRouter = require('./routes/wishlist');
 const adminRouter = require('./routes/admin');
 
+// 1. app 객체는 여기서 '딱 한 번만' 선언합니다.
 const app = express();
 
 // 실행 위치 관계없이 현재 엔트리 파일 기준으로 데이터베이스 절대경로 자동 매핑
@@ -129,5 +133,23 @@ app.use(function(err, req, res, next) {
     res.status(err.status || 500);
     res.render('error');
 });
+
+/**
+ * 2. 포트 설정 및 서버 구동 코드를 '맨 아래쪽'으로 몰아서 완벽히 연동합니다.
+ */
+const port = normalizePort(process.env.PORT || '3000');
+app.set('port', port);
+
+const server = http.createServer(app);
+server.listen(port, () => {
+    console.log(`서버가 정상적으로 ${port}번 포트에서 구동 중입니다!`);
+});
+
+function normalizePort(val) {
+    var port = parseInt(val, 10);
+    if (isNaN(port)) return val;
+    if (port >= 0) return port;
+    return false;
+}
 
 module.exports = app;
