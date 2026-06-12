@@ -12,7 +12,12 @@ router.post('/add', (req, res) => {
     const productId = req.body.productId;
 
     if (!user) {
-        return res.status(401).json({ success: false, message: '로그인이 필요합니다.' });
+        return res.status(401).send(`
+            <script>
+                alert('장바구니 담기 위해서는 로그인이 필요합니다.');
+                location.href = '../user/login';
+            </script>
+        `);
     }
 
     const query = `INSERT INTO cart_items (user_id, product_id, quantity) 
@@ -22,10 +27,19 @@ router.post('/add', (req, res) => {
     db.run(query, [user.id, productId], function (err) {
         if (err) {
             console.error('장바구니 추가 오류:', err.message);
-            return res.status(500).json({ success: false, message: '장바구니 추가 실패' });
+            return res.status(500).send('장바구니 추가 실패');
         }
-        // 🚩 [핵심 복구] 성공 시 브라우저에게 성공했다는 신호만 전달
-        res.json({ success: true });
+
+        // 🚩 [핵심 복구] 흰 화면 없이 바로 선택창 띄우고 브라우저 제어
+        res.send(`
+            <script>
+                if (confirm('장바구니에 상품이 정상적으로 담겼습니다.\\n장바구니로 이동하시겠습니까?')) {
+                    location.href = '../cart';
+                } else {
+                    location.href = '../products';
+                }
+            </script>
+        `);
     });
 });
 
