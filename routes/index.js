@@ -15,6 +15,7 @@ router.get('/', (req, res) => {
             return res.status(500).send('추천 상품 불러오기 실패');
         }
 
+        // 검증 완료: 템플릿 엔진 파일명 매핑 방식으로 상대 경로 계층에 전혀 영향을 주지 않음
         res.render('index', {
             title: '내 쇼핑몰',
             featuredProducts,

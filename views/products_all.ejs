@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>전체 상품 목록 - Refresh Beverage Mall</title>
-    <link rel="stylesheet" href="../../stylesheets/style.css">
+    <link rel="stylesheet" href="../stylesheets/style.css">
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", "맑은 고딕", helvetica, sans-serif;
@@ -273,7 +273,7 @@
             <% products.forEach(product => { %>
                 <div class="shopping-card-box">
                     <div class="card-img-wrapper">
-                        <img src="../../images/<%= product.image || 'default.png' %>" alt="<%= product.name %>">
+                        <img src="../images/<%= product.image || 'default.png' %>" alt="<%= product.name %>">
                     </div>
                     <div class="card-info-content">
                         <h4><%= product.emoji || '🥤' %> <%= product.name %></h4>
@@ -282,11 +282,11 @@
                         </div>
 
                         <div class="card-btn-group">
-                            <form action="../../cart/add" method="POST" style="margin:0; flex-grow:1;">
+                            <form action="../cart/add" method="POST" style="margin:0; flex-grow:1;">
                                 <input type="hidden" name="productId" value="<%= product.id %>">
                                 <button type="submit" class="btn-action-cart">🛒 장바구니</button>
                             </form>
-                            <form action="../../wishlist/add" method="POST" style="margin:0;">
+                            <form action="../wishlist/add" method="POST" style="margin:0;">
                                 <input type="hidden" name="productId" value="<%= product.id %>">
                                 <button type="submit" class="btn-action-wish">❤️</button>
                             </form>

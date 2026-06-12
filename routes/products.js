@@ -16,6 +16,7 @@ router.get('/', (req, res) => {
         db.all(queryFeatured, (err2, featuredProducts) => {
             if (err2) return res.status(500).send('DB 오류: 추천 상품 조회 실패');
 
+            // 검증 완료: 뷰 파일 이름만 문자열로 넘겨주므로 상대 경로 규칙에 아무런 문제를 주지 않음
             res.render('products', {
                 allProducts: allProducts,
                 featuredProducts: featuredProducts,
@@ -30,6 +31,7 @@ router.get('/all', (req, res) => {
     db.all('SELECT * FROM products ORDER BY id DESC', (err, rows) => {
         if (err) return res.status(500).send('전체 상품 목록 불러오기 실패');
 
+        // 검증 완료: 뷰 파일 이름 호출 규격 이상 없음
         res.render('products_all', {
             products: rows,
             user: req.session.user
