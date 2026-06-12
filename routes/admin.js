@@ -46,7 +46,7 @@ router.post('/user/kick', (req, res) => {
 
 router.get('/products', (req, res) => {
     db.all('SELECT * FROM products ORDER BY id DESC', (err, rows) => {
-        if (err) return res.status(500).send('商品 조회 에러');
+        if (err) return res.status(500).send('상품 조회 에러');
         res.render('admin/products', { products: rows, user: req.session.user });
     });
 });

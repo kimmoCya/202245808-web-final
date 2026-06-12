@@ -1,7 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('./db/database.sqlite');
+const path = require('path');
+
+// [상대경로 완벽 고정] 실행 위치와 관계없이 현재 파일 폴더 기준으로 DB 경로를 추적합니다.
+const dbPath = path.resolve(__dirname, '../db/database.sqlite');
+const db = new sqlite3.Database(dbPath);
 
 // 위시리스트 추가
 router.post('/add', (req, res) => {

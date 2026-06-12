@@ -1,9 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('./db/database.sqlite');
+const path = require('path');
 
-// 메인 페이지 조회 (메인 추천 노출중 상품 중 랜덤 4개 추출)
+const dbPath = path.resolve(__dirname, '../db/database.sqlite');
+const db = new sqlite3.Database(dbPath);
+
+// 메인 페이지 조회 (추천 상태 상품 중 랜덤 4개 추출)
 router.get('/', (req, res) => {
     const query = "SELECT * FROM products WHERE status = '메인 추천 노출중' ORDER BY RANDOM() LIMIT 4";
 

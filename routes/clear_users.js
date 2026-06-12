@@ -1,18 +1,19 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
+// 현재 파일 위치 기준으로 데이터베이스 절대경로 자동 해석
 const dbPath = path.resolve(__dirname, '../db/database.sqlite');
 const db = new sqlite3.Database(dbPath);
 
 db.serialize(() => {
-    console.log('🔄 잘못된 유저 테이블 구조 완전 삭제 시작...');
+    console.log('유저 테이블 구조 초기화 시작...');
 
-    // 💡 데이터뿐만 아니라 테이블 자체를 날려버려서 app.js가 새로 만들 수 있게 합니다.
+    // 무결성 오류 및 컬럼 변경 반영을 위한 기존 유저 테이블 드롭
     db.run('DROP TABLE IF EXISTS users', function(err) {
         if (err) {
-            console.error('❌ 유저 테이블 삭제 실패:', err.message);
+            console.error('유저 TABLE DROP 실패:', err.message);
         } else {
-            console.log('✅ 상품 데이터는 유지한 채, 잘못된 유저 테이블 구조를 완벽히 제거했습니다.');
+            console.log('기존 유저 테이블 제거 완료. 어플리케이션 재시작 시 자동 재생성됩니다.');
         }
         db.close();
     });

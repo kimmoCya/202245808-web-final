@@ -4,6 +4,8 @@ const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
 const router = express.Router();
+
+// [상대경로 완벽 고정] 실행 위치와 관계없이 현재 파일 폴더 기준으로 DB 경로를 추적합니다.
 const dbPath = path.resolve(__dirname, '../db/database.sqlite');
 const db = new sqlite3.Database(dbPath);
 
@@ -21,6 +23,7 @@ router.post('/register', async (req, res) => {
         if (err) return res.send('<script>alert("DB 오류"); history.back();</script>');
 
         if (existingUser) {
+            // 과거 탈퇴 계정이 동일 아이디로 가입 시 재가입 유도 인터셉트
             if (existingUser.is_withdrawn === 1) {
                 return res.send(`
                     <script>
@@ -60,6 +63,7 @@ router.post('/login', (req, res) => {
         const match = await bcrypt.compare(password, user.password);
 
         if (match) {
+            // 소프트 딜리트 상태인 유저는 재가입 비밀번호 변경 폼으로 포워딩
             if (user.is_withdrawn === 1) {
                 return res.render('user_rejoin', { username: user.username });
             }

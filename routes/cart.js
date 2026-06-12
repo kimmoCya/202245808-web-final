@@ -1,9 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('./db/database.sqlite');
+const path = require('path');
 
-// 장바구니에 담기 (컨펌 팝업창 적용 버전)
+const dbPath = path.resolve(__dirname, '../db/database.sqlite');
+const db = new sqlite3.Database(dbPath);
+
+// 장바구니에 담기
 router.post('/add', (req, res) => {
     const user = req.session.user;
     const productId = req.body.productId;
@@ -15,7 +18,6 @@ router.post('/add', (req, res) => {
         });
     }
 
-    // 기존의 정상 작동하던 정우님 고유의 온콘플릭트 쿼리 그대로 복원
     const query = `INSERT INTO cart_items (user_id, product_id, quantity) 
                  VALUES (?, ?, 1) 
                  ON CONFLICT(user_id, product_id) DO UPDATE SET quantity = quantity + 1`;
@@ -26,7 +28,6 @@ router.post('/add', (req, res) => {
             return res.status(500).send('장바구니 추가 실패');
         }
 
-        // 정상 등록 후 브라우저에 자바스크립트 confirm 창 전송
         res.send(`
             <script>
                 if (confirm("장바구니에 상품이 정상적으로 담겼습니다.\\n장바구니 페이지로 이동하시겠습니까?")) {
