@@ -151,14 +151,67 @@
             <tbody>
             <% if (typeof products !== 'undefined' && products && products.length > 0) { %>
                 <% products.forEach(product => { %>
-            <tr id="row-<%= product.id %>">
-                <td class="prod-id">#<%= product.id %></td>
-                <td style="font-weight: 700; color: #0f172a;"><%= product.name %></td>
-                <td style="font-weight: 600;">₩<%= product.price.toLocaleString() %></td>
-                <td>
-                    <select class="status-select <%= product.status === '메인 추천 노출중' ? 'featured' : '' %>" onchange="updateStatus('<%= product.id %>', this)">
-                        <option value="일반" <%= product.status === '일반' ? 'selected' : '' %>>일반</option>
-                        <option value="메인 추천 노출중" <%= product.status === '메인 추천 노출중' ? 'selected' : '' %>>🌟 메인 추천 노출중</option>
-                    </select>
-                </td>
-                <td class="action-links">
+                    <tr id="row-<%= product.id %>">
+                        <td class="prod-id">#<%= product.id %></td>
+                        <td style="font-weight: 700; color: #0f172a;"><%= product.name %></td>
+                        <td style="font-weight: 600;">₩<%= product.price.toLocaleString() %></td>
+                        <td>
+                            <select class="status-select <%= product.status === '메인 추천 노출중' ? 'featured' : '' %>" onchange="updateStatus('<%= product.id %>', this)">
+                                <option value="일반" <%= product.status === '일반' ? 'selected' : '' %>>일반</option>
+                                <option value="메인 추천 노출중" <%= product.status === '메인 추천 노출중' ? 'selected' : '' %>>🌟 메인 추천 노출중</option>
+                            </select>
+                        </td>
+                        <td class="action-links">
+                            <a href="products/edit/<%= product.id %>" class="edit-btn">수정</a>
+                            <button type="button" class="delete-btn" onclick="deleteProduct('<%= product.id %>')">삭제</button>
+                        </td>
+                    </tr>
+                <% }) %>
+            <% } else { %>
+                <tr><td colspan="5" style="padding: 50px; color: #94a3b8; text-align: center; font-weight: 500;">진열된 음료 상품이 존재하지 않습니다.</td></tr>
+            <% } %>
+            </tbody>
+        </table>
+    </main>
+    <footer>&copy; 2026 시스템 관리 센터. All rights reserved.</footer>
+</div>
+
+<script>
+    function updateStatus(productId, selectElement) {
+        const newStatus = selectElement.value;
+        if(newStatus === '메인 추천 노출중') selectElement.classList.add('featured');
+        else selectElement.classList.remove('featured');
+
+        // ⭕ [교정 완결] 구문 오류 유발 지점에 마감 괄호 및 리다이렉트 무결성 콜백 추가 완료
+        fetch('products/edit/' + productId, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: productId, status: newStatus })
+        })
+            .then(res => {
+                if (!res.ok) { alert('상태 변경 실패'); location.reload(); }
+            })
+            .catch(err => console.error('Error:', err));
+    }
+
+    function deleteProduct(productId) {
+        if (confirm('이 음료 상품을 대장에서 즉시 삭제하시겠습니까?')) {
+            // ⭕ [교정 완결] 백엔드의 router.post('/products/delete/:id') 규칙과 정확히 바인딩 연동
+            fetch('products/delete/' + productId, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+                .then(res => {
+                    if (res.ok) {
+                        alert('상품이 성공적으로 삭제되었습니다.');
+                        document.getElementById('row-' + productId).remove();
+                    } else {
+                        alert('삭제 실패');
+                    }
+                })
+                .catch(err => console.error('Error:', err));
+        }
+    }
+</script>
+</body>
+</html>
