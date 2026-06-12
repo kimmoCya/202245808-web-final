@@ -12,10 +12,7 @@ router.post('/add', (req, res) => {
     const productId = req.body.productId;
 
     if (!user) {
-        return res.status(401).render('login_required', {
-            message: '장바구니 담기 위해서는 로그인이 필요합니다.',
-            redirectUrl: 'user/login'
-        });
+        return res.status(401).json({ success: false, message: '로그인이 필요합니다.' });
     }
 
     const query = `INSERT INTO cart_items (user_id, product_id, quantity) 
@@ -25,17 +22,17 @@ router.post('/add', (req, res) => {
     db.run(query, [user.id, productId], function (err) {
         if (err) {
             console.error('장바구니 추가 오류:', err.message);
-            return res.status(500).send('장바구니 추가 실패');
+            return res.status(500).json({ success: false, message: '장바구니 추가 실패' });
         }
-        // [수정] 주소 중복 누적을 차단하기 위해 슬래시를 명시하여 베이스 컨텍스트로 리다이렉트
-        res.redirect('cart/');
+        // 🚩 [핵심 복구] 성공 시 브라우저에게 성공했다는 신호만 전달
+        res.json({ success: true });
     });
 });
 
 // 주소창: .../cart
 router.get('/', (req, res) => {
     const user = req.session.user;
-    if (!user) return res.redirect('user/login');
+    if (!user) return res.redirect('../user/login');
 
     const query = `
     SELECT p.id, p.name, p.price, p.emoji, p.image, c.quantity
@@ -51,34 +48,25 @@ router.get('/', (req, res) => {
 
 // 주소창: .../cart/update
 router.post('/update', (req, res) => {
-    if (!req.session.user) {
-        return res.redirect('login_required');
-    }
+    if (!req.session.user) return res.redirect('../login_required');
     const userId = req.session.user.id;
     const productId = req.body.productId;
     const action = req.body.action;
 
     db.get(`SELECT quantity FROM cart_items WHERE user_id = ? AND product_id = ?`, [userId, productId], (err, row) => {
-        if (err || !row) {
-            return res.status(500).send("조회 실패");
-        }
+        if (err || !row) return res.status(500).send("조회 실패");
 
         let newQuantity = row.quantity;
-        if (action === 'increase') {
-            newQuantity += 1;
-        } else if (action === 'decrease') {
-            newQuantity -= 1;
-        }
+        if (action === 'increase') newQuantity += 1;
+        else if (action === 'decrease') newQuantity -= 1;
 
         if (newQuantity <= 0) {
             db.run(`DELETE FROM cart_items WHERE user_id = ? AND product_id = ?`, [userId, productId], (err) => {
-                // [수정] 알림창 없이 묵묵하게 장바구니 새로고침
-                return res.redirect('cart/');
+                return res.redirect('../cart');
             });
         } else {
             db.run(`UPDATE cart_items SET quantity = ? WHERE user_id = ? AND product_id = ?`, [newQuantity, userId, productId], (err) => {
-                // [수정] 수량 변경 즉시 알림창 없이 갱신 처리
-                return res.redirect('cart/');
+                return res.redirect('../cart');
             });
         }
     });
@@ -88,16 +76,12 @@ router.post('/update', (req, res) => {
 router.post('/delete', (req, res) => {
     const user = req.session.user;
     const { productId } = req.body;
-
-    if (!user) return res.redirect('user/login');
+    if (!user) return res.redirect('../user/login');
 
     const query = `DELETE FROM cart_items WHERE user_id = ? AND product_id = ?`;
     db.run(query, [user.id, productId], (err) => {
-        if (err) {
-            return res.status(500).send('삭제 실패');
-        }
-        // [수정] 삭제 완료 후 알림창 없이 묵묵하게 목록 갱신
-        res.redirect('cart/');
+        if (err) return res.status(500).send('삭제 실패');
+        res.redirect('../cart');
     });
 });
 
