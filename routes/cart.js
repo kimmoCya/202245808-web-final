@@ -27,8 +27,8 @@ router.post('/add', (req, res) => {
             console.error('장바구니 추가 오류:', err.message);
             return res.status(500).send('장바구니 추가 실패');
         }
-        // ⭕ 알림창 없이 묵묵하게 장바구니 화면으로 새로고침 이동
-        res.redirect('cart');
+        // [수정] 주소 중복 누적을 차단하기 위해 슬래시를 명시하여 베이스 컨텍스트로 리다이렉트
+        res.redirect('cart/');
     });
 });
 
@@ -72,13 +72,13 @@ router.post('/update', (req, res) => {
 
         if (newQuantity <= 0) {
             db.run(`DELETE FROM cart_items WHERE user_id = ? AND product_id = ?`, [userId, productId], (err) => {
-                // ⭕ 알림창 없이 바로 장바구니 화면 새로고침
-                return res.redirect('cart');
+                // [수정] 알림창 없이 묵묵하게 장바구니 새로고침
+                return res.redirect('cart/');
             });
         } else {
             db.run(`UPDATE cart_items SET quantity = ? WHERE user_id = ? AND product_id = ?`, [newQuantity, userId, productId], (err) => {
-                // ⭕ 알림창 없이 바로 장바구니 화면 새로고침해서 숫자만 슥 올라가게 처리
-                return res.redirect('cart');
+                // [수정] 수량 변경 즉시 알림창 없이 갱신 처리
+                return res.redirect('cart/');
             });
         }
     });
@@ -96,8 +96,8 @@ router.post('/delete', (req, res) => {
         if (err) {
             return res.status(500).send('삭제 실패');
         }
-        // ⭕ 삭제도 알림창 없이 바로 목록 갱신
-        res.redirect('cart');
+        // [수정] 삭제 완료 후 알림창 없이 묵묵하게 목록 갱신
+        res.redirect('cart/');
     });
 });
 

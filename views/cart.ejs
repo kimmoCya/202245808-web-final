@@ -6,7 +6,6 @@
     <title>장바구니 - Refresh Beverage Mall</title>
 
     <script>
-        // 현재 브라우저 주소창에서 계정명 주소 레벨까지만 추출하여 기준점으로 강제 고정함
         const pathSegments = window.location.pathname.split('/');
         const contextPath = pathSegments[1] ? '/' + pathSegments[1] + '/' : '/';
         const baseTag = document.createElement('base');
@@ -113,8 +112,8 @@
     <nav class="nav-menu-group">
         <a href="products">홈</a>
         <a href="products">상품목록</a>
-        <a href="cart" class="active">장바구니</a>
-        <a href="board">고객센터</a>
+        <a href="cart/" class="active">장바구니</a>
+        <a href="board" class="nav-item">고객센터</a>
     </nav>
 </header>
 
