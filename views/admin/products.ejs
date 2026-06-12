@@ -132,7 +132,7 @@
     <header class="board-header">
         <h2>현재 몰 진열 상품 관리대장</h2>
         <div class="btn-group-right">
-            <a href="dashboard" class="btn-home">대시보드로 복귀</a>
+            <a href="./" class="btn-home">대시보드로 복귀</a>
             <a href="products/new" class="btn-add-product">신규 상품 추가</a>
         </div>
     </header>
@@ -182,7 +182,7 @@
         if(newStatus === '메인 추천 노출중') selectElement.classList.add('featured');
         else selectElement.classList.remove('featured');
 
-        // ⭕ [교정 완결] 구문 오류 유발 지점에 마감 괄호 및 리다이렉트 무결성 콜백 추가 완료
+        // ⭕ [교정 완결] 구문 오류 마감 괄호 및 리다이렉트 무결성 체인 바인딩 완료
         fetch('products/edit/' + productId, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
