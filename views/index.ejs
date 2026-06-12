@@ -320,10 +320,10 @@
 <body>
 
 <div class="top-utility-bar">
-    <% if (user) { %>
+    <% if (typeof user !== 'undefined' && user) { %>
         <span class="user-welcome">안녕하세요, <strong><%= user.username %></strong>님!</span>
         <% if (user.role === 'ADMIN') { %>
-            <a href="admin" class="top-link font-bold"><span class="badge-admin">ADMIN</span> 관리실</a>
+            <a href="admin/" class="top-link font-bold"><span class="badge-admin">ADMIN</span> 관리실</a>
         <% } %>
         <a href="mypage" class="top-link">마이페이지</a>
         <a href="user/logout" class="top-link" style="color: #f43f5e;">로그아웃</a>
@@ -353,7 +353,7 @@
             <a href="products" class="btn-billboard-action">지금 구매하기 →</a>
         </div>
         <div class="billboard-img-zone">
-            <img src="./images/drink.png" alt="Beverage Premium Main Image">
+            <img src="images/drink.png" alt="Beverage Premium Main Image">
         </div>
     </section>
 
@@ -368,7 +368,7 @@
                 <% featuredProducts.forEach(product => { %>
                     <div class="shopping-card-box">
                         <div class="card-img-wrapper">
-                            <img src="./images/<%= product.image || 'default.png' %>" alt="<%= product.name %>">
+                            <img src="images/<%= product.image || 'default.png' %>" alt="<%= product.name %>">
                         </div>
                         <div class="card-info-content">
                             <h4><%= product.name %></h4>

@@ -269,27 +269,27 @@
 <body>
 
 <div class="top-utility-bar">
-    <% if (user) { %>
+    <% if (typeof user !== 'undefined' && user) { %>
         <span class="user-welcome">안녕하세요, <strong><%= user.username %></strong>님!</span>
         <% if (user.role === 'ADMIN') { %>
-            <a href="admin" class="top-link font-bold"><span class="badge-admin">ADMIN</span> 관리실</a>
+            <a href="../admin/" class="top-link font-bold"><span class="badge-admin">ADMIN</span> 관리실</a>
         <% } %>
-        <a href="mypage" class="top-link">마이페이지</a>
-        <a href="user/logout" class="top-link" style="color: #f43f5e;">로그아웃</a>
+        <a href="../mypage" class="top-link">마이페이지</a>
+        <a href="../user/logout" class="top-link" style="color: #f43f5e;">로그아웃</a>
     <% } else { %>
         <span class="user-welcome">방문객님 환영합니다!</span>
-        <a href="user/login" class="top-link">로그인</a>
-        <a href="user/register" class="top-link">회원가입</a>
+        <a href="../user/login" class="top-link">로그인</a>
+        <a href="../user/register" class="top-link">회원가입</a>
     <% } %>
 </div>
 
 <header class="main-gnb-header">
-    <a href="./" class="brand-logo">Refresh <span>Beverage</span></a>
+    <a href="../" class="brand-logo">Refresh <span>Beverage</span></a>
     <nav class="nav-menu-group">
-        <a href="./" class="nav-item">홈</a>
-        <a href="products" class="nav-item active">상품목록</a>
-        <a href="cart" class="nav-item">장바구니</a>
-        <a href="board" class="nav-item">고객센터</a>
+        <a href="../" class="nav-item">홈</a>
+        <a href="./" class="nav-item active">상품목록</a>
+        <a href="../cart" class="nav-item">장바구니</a>
+        <a href="../board" class="nav-item">고객센터</a>
     </nav>
 </header>
 
@@ -297,7 +297,7 @@
 
     <div class="info-bar-stack">
         <div class="info-bar">
-            <% if (user) { %>
+            <% if (typeof user !== 'undefined' && user) { %>
                 <span>👋 <%= user.name %>님, 오늘도 상큼하고 즐거운 쇼핑 되세요!</span>
             <% } else { %>
                 <span style="color: #ef4444; width: 100%; text-align: center;">🛑 로그인 후 시원한 장바구니와 위시리스트를 정상 이용할 수 있습니다.</span>
@@ -320,7 +320,7 @@
                 <% featuredProducts.forEach(product => { %>
                     <div class="shopping-card-box">
                         <div class="card-img-wrapper">
-                            <img src="./images/<%= product.image || 'default.png' %>" alt="<%= product.name %>">
+                            <img src="../images/<%= product.image || 'default.png' %>" alt="<%= product.name %>">
                         </div>
                         <div class="card-info-content">
                             <h4><%= product.emoji || '🍹' %> <%= product.name %></h4>
@@ -330,11 +330,11 @@
                             </div>
 
                             <div class="card-btn-group">
-                                <form action="cart/add" method="POST" style="margin:0; flex-grow:1;">
+                                <form action="../cart/add" method="POST" style="margin:0; flex-grow:1;">
                                     <input type="hidden" name="productId" value="<%= product.id %>">
                                     <button type="submit" class="btn-action-cart">🛒 장바구니</button>
                                 </form>
-                                <form action="wishlist/add" method="POST" style="margin:0;">
+                                <form action="../wishlist/add" method="POST" style="margin:0;">
                                     <input type="hidden" name="productId" value="<%= product.id %>">
                                     <button type="submit" class="btn-action-wish">❤️</button>
                                 </form>
