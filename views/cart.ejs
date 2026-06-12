@@ -88,6 +88,7 @@
         <span class="user-welcome">안녕하세요, <strong><%= user.username %></strong>님!</span>
         <% if (user.role === 'ADMIN') { %>
             <a href="admin/" class="top-link font-bold"><span class="badge-admin">ADMIN</span> 관리실</a>
+        <% } %>
         <a href="mypage" class="top-link">마이페이지</a>
         <a href="user/logout" class="top-link" style="color: #f43f5e;">로그아웃</a>
     <% } else { %>
@@ -130,13 +131,17 @@
                     </div>
 
                     <div style="display: flex; align-items: center; gap: 20px;">
-                        <div class="quantity-box">
-                            <button type="button" class="qty-btn" onclick="updateQty('<%= item.id %>', 'decrease')">－</button>
+                        <form action="cart/update" method="POST" class="quantity-box">
+                            <input type="hidden" name="productId" value="<%= item.id %>">
+                            <button type="submit" name="action" value="decrease" class="qty-btn">－</button>
                             <div class="qty-num"><%= item.quantity %></div>
-                            <button type="button" class="qty-btn" onclick="updateQty('<%= item.id %>', 'increase')">＋</button>
-                        </div>
+                            <button type="submit" name="action" value="increase" class="qty-btn">＋</button>
+                        </form>
 
-                        <button type="button" class="btn-delete" onclick="deleteItem('<%= item.id %>')">삭제</button>
+                        <form action="cart/delete" method="POST" style="margin: 0;">
+                            <input type="hidden" name="productId" value="<%= item.id %>">
+                            <button type="submit" class="btn-delete">삭제</button>
+                        </form>
                     </div>
                 </div>
             <% }) %>
@@ -155,32 +160,6 @@
 <footer>
     <p>&copy; 2026 Refresh Beverage Mall. All rights reserved.</p>
 </footer>
-
-<script>
-    function updateQty(productId, action) {
-        fetch('cart/update', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'productId=' + productId + '&action=' + action
-        })
-            .then(() => {
-                location.reload();
-            })
-            .catch(err => console.error('수량 변경 오류:', err));
-    }
-
-    function deleteItem(productId) {
-        fetch('cart/delete', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'productId=' + productId
-        })
-            .then(() => {
-                location.reload();
-            })
-            .catch(err => console.error('삭제 오류:', err));
-    }
-</script>
 
 </body>
 </html>
