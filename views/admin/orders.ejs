@@ -31,12 +31,11 @@
 <div class="admin-container">
     <header class="board-header">
         <h2>🚚 고객 주문 및 배송 상태 일괄 처리장</h2>
-        <a href="/admin" class="btn-home">⬅ 대시보드로 복귀</a>
+        <a href="./" class="btn-home">⬅ 대시보드로 복귀</a>
     </header>
 
     <main>
-        <!-- 💡 일괄 수정을 위해 전체 테이블을 form으로 감쌉니다 -->
-        <form action="/admin/orders/update-batch" method="POST">
+        <form action="orders/update-batch" method="POST">
             <table class="management-table">
                 <thead>
                 <tr>

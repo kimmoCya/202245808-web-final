@@ -109,8 +109,7 @@
 <div class="edit-container">
     <h2>✏️ 글 수정</h2>
 
-    <!-- 기존 라우터 처리 경로 명확하게 유지 매핑 -->
-    <form action="/board/edit/<%= post.id %>" method="post">
+    <form action="../edit/<%= post.id %>" method="post">
 
         <label for="title">📝 제목</label>
         <input type="text" id="title" name="title" placeholder="수정할 제목을 입력하세요" value="<%= post.title %>" required>
@@ -119,8 +118,7 @@
         <textarea id="content" name="content" placeholder="수정할 내용을 입력하세요" rows="12" required><%= post.content %></textarea>
 
         <div class="form-actions">
-            <!-- 상세 글 보기 화면 주소 흐름 유지 전환 -->
-            <a href="/board/view/<%= post.id %>" class="btn-back">← 원글로 돌아가기</a>
+            <a href="../view/<%= post.id %>" class="btn-back">← 원글로 돌아가기</a>
             <button type="submit" class="btn-submit">💚 수정 완료</button>
         </div>
     </form>

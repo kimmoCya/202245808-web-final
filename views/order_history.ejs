@@ -15,6 +15,7 @@
         .history-container { max-width: 600px; margin: 0 auto; }
         h2 { font-size: 22px; font-weight: 700; color: #1e293b; margin-bottom: 20px; }
         .order-box { border: 1px solid #e2e8f0; padding: 20px; border-radius: 12px; margin-bottom: 20px; background: white; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
+        .order-box { border: 1px solid #e2e8f0; padding: 20px; border-radius: 12px; margin-bottom: 20px; background: white; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
         .order-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 0.95em; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 15px; color: #64748b; }
         .product-line { font-size: 14px; color: #334155; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
 
@@ -38,7 +39,7 @@
 <body>
 <div class="history-container">
     <h2>나의 주문 결제 내역</h2>
-    <p><a href="/mypage">← 마이페이지로 돌아가기</a></p>
+    <p><a href="../mypage">← 마이페이지로 돌아가기</a></p>
     <hr style="border: 0; height: 1px; background: #e2e8f0; margin-bottom: 20px;">
 
     <% if (!orders || orders.length === 0) { %>
@@ -69,7 +70,7 @@
                 <div class="order-footer-bar">
                     <div>
                         <% if (order.status === '배송준비중') { %>
-                            <form action="/order/cancel" method="POST" onsubmit="return confirm('해당 주문을 전면 취소하시겠습니까? 주문 금액이 환불됩니다.')" style="margin: 0;">
+                            <form action="../order/cancel" method="POST" onsubmit="return confirm('해당 주문을 전면 취소하시겠습니까? 주문 금액이 환불됩니다.')" style="margin: 0;">
                                 <input type="hidden" name="orderId" value="<%= order.orderId %>">
                                 <button type="submit" class="btn-order-cancel">주문 취소</button>
                             </form>

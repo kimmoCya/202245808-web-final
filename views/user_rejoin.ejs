@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
+    <meta charset="UTF-8">
     <title>계정 재가입 및 복구</title>
-    <link rel="stylesheet" href="/stylesheets/style.css">
+    <link rel="stylesheet" href="../stylesheets/style.css">
     <style>
         .rejoin-container { max-width: 450px; margin: 80px auto; padding: 30px; border: 1px solid #e2e8f0; border-radius: 12px; background: white; box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-align: center; }
         .accent-box { background-color: #eff6ff; color: #1e40af; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; line-height: 1.5; }
@@ -22,8 +23,7 @@
         앞으로 사용할 새로운 비밀번호를 입력해 주세요.
     </div>
 
-    <form action="/user/rejoin-submit" method="POST">
-        <!-- 보안 및 식별을 위해 숨겨서 아이디를 백엔드로 전송 -->
+    <form action="rejoin-submit" method="POST">
         <input type="hidden" name="username" value="<%= username %>">
 
         <div class="form-group">

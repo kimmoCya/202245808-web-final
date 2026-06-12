@@ -132,8 +132,8 @@
     <header class="board-header">
         <h2>현재 몰 진열 상품 관리대장</h2>
         <div class="btn-group-right">
-            <a href="/admin" class="btn-home">대시보드로 복귀</a>
-            <a href="/admin/products/new" class="btn-add-product">신규 상품 추가</a>
+            <a href="./" class="btn-home">대시보드로 복귀</a>
+            <a href="products/new" class="btn-add-product">신규 상품 추가</a>
         </div>
     </header>
 
@@ -142,7 +142,6 @@
             <thead>
             <tr>
                 <th style="width: 12%;">상품번호</th>
-                <!-- 💡 '商品' 한자를 '상품' 한글로 변경 완료 -->
                 <th style="width: 38%;">상품 이름</th>
                 <th style="width: 18%;">판매가</th>
                 <th style="width: 20%;">속성 고유상태</th>
@@ -163,7 +162,7 @@
                             </select>
                         </td>
                         <td class="action-links">
-                            <a href="/admin/products/edit/<%= product.id %>" class="edit-btn">수정</a>
+                            <a href="products/edit/<%= product.id %>" class="edit-btn">수정</a>
                             <button type="button" class="delete-btn" onclick="deleteProduct('<%= product.id %>')">삭제</button>
                         </td>
                     </tr>
@@ -183,7 +182,8 @@
         if(newStatus === '메인 추천 노출중') selectElement.classList.add('featured');
         else selectElement.classList.remove('featured');
 
-        fetch('/admin/products/update-status', {
+        // /admin/products/update-status 에서 맨 앞 슬래시를 제거하여 배포 서버 포워딩 경로 유지
+        fetch('products/update-status', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id: productId, status: newStatus })
@@ -195,7 +195,8 @@
 
     function deleteProduct(productId) {
         if (confirm('이 음료 상품을 대장에서 즉시 삭제하시겠습니까?')) {
-            fetch('/admin/products/delete', {
+            // /admin/products/delete 에서 맨 앞 슬래시를 제거하여 현재 디렉토리 컨텍스트에서 제어하게 변경
+            fetch('products/delete', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ productId: productId })

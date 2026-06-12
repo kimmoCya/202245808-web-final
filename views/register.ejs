@@ -5,9 +5,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>회원가입 - Refresh Beverage Mall</title>
-    <link rel="stylesheet" href="/stylesheets/style.css">
+    <link rel="stylesheet" href="../stylesheets/style.css">
     <style>
-        /* 💡 현대적인 이커머스 전용 기본 베이스 스타일링 */
+        /* 현대적인 이커머스 전용 기본 베이스 스타일링 */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", "맑은 고딕", helvetica, sans-serif;
             margin: 0; padding: 0;
@@ -211,81 +211,16 @@
 </head>
 <body>
 
-<!-- 1단: 쇼핑몰 최상단 유틸리티 바 -->
 <div class="top-utility-bar">
     <span class="user-welcome">방문객님 환영합니다!</span>
-    <a href="/user/login" class="top-link">로그인</a>
-    <a href="/user/register" class="top-link font-bold" style="color: #0ea5e9;">회원가입</a>
+    <a href="login" class="top-link">로그인</a>
+    <a href="register" class="top-link font-bold" style="color: #0ea5e9;">회원가입</a>
 </div>
 
-<!-- 2단: 쇼핑몰 고정 상단 GNB 바 (대칭 고정 일치 완료) -->
 <header class="main-gnb-header">
-    <a href="/" class="brand-logo">🥤 Refresh <span>Beverage</span></a>
+    <a href="../" class="brand-logo">🥤 Refresh <span>Beverage</span></a>
     <nav class="nav-menu-group">
-        <a href="/" class="nav-item">홈</a>
-        <a href="/products" class="nav-item">상품목록</a>
-        <a href="/cart" class="nav-item">장바구니</a>
-        <a href="/board" class="nav-item">고객센터</a>
-    </nav>
-</header>
-
-<!-- 회원가입 본문 프레임 구역 -->
-<div class="register-contents-body">
-
-    <div class="register-card-box">
-        <h2>회원가입</h2>
-        <p class="register-sub-text">회원정보를 입력해 주시면 청량한 혜택이 시작됩니다.</p>
-
-        <!-- 백엔드 Express routes/user.js 회원등록 라우터 연동 -->
-        <form action="/user/register" method="post">
-
-            <div class="form-group">
-                <label for="username" class="required">아이디</label>
-                <input type="text" id="username" name="username" placeholder="사용할 아이디를 입력하세요" required>
-            </div>
-
-            <div class="form-group">
-                <label for="name" class="required">이름</label>
-                <input type="text" id="name" name="name" placeholder="이름을 입력해주세요" required>
-            </div>
-
-            <div class="form-group">
-                <label for="password" class="required">비밀번호</label>
-                <input type="password" id="password" name="password" placeholder="비밀번호를 입력해주세요" required>
-            </div>
-
-            <div class="form-group">
-                <label for="birth">생년월일</label>
-                <input type="text" id="birth" name="birth" placeholder="예: 19990327">
-            </div>
-
-            <div class="form-group">
-                <label for="email" class="required">이메일</label>
-                <input type="email" id="email" name="email" placeholder="예: hong2026@naver.com" required>
-            </div>
-
-            <div class="form-group">
-                <label for="phone">연락처</label>
-                <input type="tel" id="phone" name="phone" placeholder="휴대폰 '-' 없이 숫자만 입력하세요">
-            </div>
-
-            <div class="form-group">
-                <label for="address">주소</label>
-                <input type="text" id="address" name="address" placeholder="주소를 입력해주세요">
-            </div>
-
-            <button type="submit" class="btn-register-submit">가입하기</button>
-        </form>
-
-        <a href="/" class="link-back-home">🏠 메인으로 돌아가기</a>
-    </div>
-
-</div>
-
-<!-- 하단 꼬리말 구역 -->
-<footer class="mall-footer-layer">
-    <p>&copy; 2026 Refresh Beverage Mall. All rights reserved.</p>
-</footer>
-
-</body>
-</html>
+        <a href="../" class="nav-item">홈</a>
+        <a href="../products" class="nav-item">상품목록</a>
+        <a href="../cart" class="nav-item">장바구니</a>
+        <a href="../board" class="nav-

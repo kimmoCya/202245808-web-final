@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>과일 상품 정보 수정</title>
+    <title>음료 상품 정보 수정</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif; -webkit-font-smoothing: antialiased; padding: 40px; background-color: #f8fafc; }
         .form-card { max-width: 480px; margin: 0 auto; background: white; padding: 35px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
@@ -18,9 +18,10 @@
 </head>
 <body>
 <div class="form-card">
-    <h2>✏️ 과일 상품 정보 수정</h2>
-    <form action="/admin/products/edit/<%= product.id %>" method="post">
-        <label>과일 이름</label>
+    <h2>✏️ 음료 상품 정보 수정</h2>
+
+    <form action="../edit/<%= product.id %>" method="post">
+        <label>음료 이름</label>
         <input type="text" name="name" value="<%= product.name %>" required>
         <label>가격 (원)</label>
         <input type="number" name="price" value="<%= product.price %>" required>
@@ -36,7 +37,8 @@
             <option value="메인 추천 노출중" <%= product.status === '메인 추천 노출중' ? 'selected' : '' %>>🌟 메인 추천 노출중</option>
         </select>
         <button type="submit" class="btn-submit">💚 수정 내용 반영하기</button>
-        <a href="/admin/products" class="btn-back">취소하고 대장으로 가기</a>
+
+        <a href="../../products" class="btn-back">취소하고 대장으로 가기</a>
     </form>
 </div>
 </body>

@@ -167,8 +167,8 @@
     <header class="board-header">
         <h2>고객센터 게시판</h2>
         <nav class="header-nav">
-            <a href="/" class="btn-back">홈으로</a>
-            <a href="/board/new" class="btn-write-box">문의글 쓰기</a>
+            <a href="../" class="btn-back">홈으로</a>
+            <a href="board/new" class="btn-write-box">문의글 쓰기</a>
         </nav>
     </header>
 
@@ -195,7 +195,7 @@
                         </td>
 
                         <td class="col-title" style="padding-left: <%= post.parent_id ? '40px' : '20px' %>;">
-                            <a href="/board/view/<%= post.id %>" class="post-link">
+                            <a href="board/view/<%= post.id %>" class="post-link">
                                 <% if (post.parent_id) { %>
                                     <span class="reply-tag">↳ [답변]</span>
                                 <% } %>
@@ -203,8 +203,8 @@
                             </a>
 
                             <span class="action-links">
-                                (<a href="/board/edit/<%= post.id %>">수정</a> /
-                                 <a href="/board/delete/<%= post.id %>">삭제</a>)
+                                (<a href="board/edit/<%= post.id %>">수정</a> /
+                                 <a href="board/delete/<%= post.id %>">삭제</a>)
                             </span>
                         </td>
 

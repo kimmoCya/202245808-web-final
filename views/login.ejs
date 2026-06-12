@@ -2,10 +2,9 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>로그인 - Refresh Beverage Mall</title>
-    <link rel="stylesheet" href="/stylesheets/style.css">
+    <link rel="stylesheet" href="../stylesheets/style.css">
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", "맑은 고딕", helvetica, sans-serif;
@@ -72,7 +71,7 @@
         .link-register { color: #0ea5e9; text-decoration: none; font-weight: 700; }
         .link-register:hover { text-decoration: underline; }
 
-        /* 💡 일반 쇼핑몰 규격의 깔끔한 모달 레이어 팝업 CSS */
+        /* 모달 레이어 팝업 CSS */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.4); justify-content: center; align-items: center; z-index: 1000; }
         .modal-box { background-color: #ffffff; border-radius: 12px; width: 90%; max-width: 380px; padding: 30px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); box-sizing: border-box; position: relative; }
         .modal-title { font-size: 18px; font-weight: 800; color: #0f172a; margin: 0 0 20px 0; text-align: left; }
@@ -88,17 +87,17 @@
 
 <div class="top-utility-bar">
     <span class="user-welcome">방문객님 환영합니다!</span>
-    <a href="/user/login" class="top-link font-bold" style="color: #0ea5e9;">로그인</a>
-    <a href="/user/register" class="top-link">회원가입</a>
+    <a href="login" class="top-link font-bold" style="color: #0ea5e9;">로그인</a>
+    <a href="register" class="top-link">회원가입</a>
 </div>
 
 <header class="main-gnb-header">
-    <a href="/" class="brand-logo">Refresh <span>Beverage</span></a>
+    <a href="../" class="brand-logo">Refresh <span>Beverage</span></a>
     <nav class="nav-menu-group">
-        <a href="/" class="nav-item">홈</a>
-        <a href="/products" class="nav-item">상품목록</a>
-        <a href="/cart" class="nav-item">장바구니</a>
-        <a href="/board" class="nav-item">고객센터</a>
+        <a href="../" class="nav-item">홈</a>
+        <a href="../products" class="nav-item">상품목록</a>
+        <a href="../cart" class="nav-item">장바구니</a>
+        <a href="../board" class="nav-item">고객센터</a>
     </nav>
 </header>
 
@@ -107,7 +106,7 @@
         <h2>로그인</h2>
         <p class="login-sub-text">Refresh Beverage Mall에 오신 것을 환영합니다.</p>
 
-        <form action="/user/login" method="post" target="_self">
+        <form action="login" method="post" target="_self">
             <div class="form-group">
                 <label for="username">아이디</label>
                 <input type="text" id="username" name="username" placeholder="아이디를 입력하세요" required>
@@ -127,10 +126,10 @@
                 <span>|</span>
                 <a href="javascript:void(0);" onclick="showModal('pwd')">비밀번호 찾기</a>
                 <span>|</span>
-                <a href="/">홈으로</a>
+                <a href="../">홈으로</a>
             </div>
             <div class="register-guide">
-                아직 회원이 아니신가요? <a href="/user/register" class="link-register">회원가입</a>
+                아직 회원이 아니신가요? <a href="register" class="link-register">회원가입</a>
             </div>
         </div>
 
@@ -141,7 +140,7 @@
     <div class="modal-box">
         <button class="btn-modal-close" onclick="closeModal('id')">&times;</button>
         <div class="modal-title">아이디 찾기</div>
-        <form action="/user/find-id" method="POST">
+        <form action="find-id" method="POST">
             <div class="form-group">
                 <label>이름</label>
                 <input type="text" name="name" placeholder="이름을 입력하세요" required>
@@ -159,7 +158,7 @@
     <div class="modal-box">
         <button class="btn-modal-close" onclick="closeModal('pwd')">&times;</button>
         <div class="modal-title">비밀번호 찾기</div>
-        <form action="/user/find-pwd" method="POST">
+        <form action="find-pwd" method="POST">
             <div class="form-group">
                 <label>아이디</label>
                 <input type="text" name="username" placeholder="아이디를 입력하세요" required>
@@ -198,7 +197,6 @@
         }
     }
 
-    // 모달 바깥 어두운 배경 클릭 시 닫히는 기능 추가
     window.onclick = function(event) {
         const modalId = document.getElementById('modalFindId');
         const modalPwd = document.getElementById('modalFindPwd');

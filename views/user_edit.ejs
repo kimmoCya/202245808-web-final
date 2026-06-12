@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
+    <meta charset="UTF-8">
     <title>회원 정보 수정</title>
-    <link rel="stylesheet" href="/stylesheets/style.css">
+    <link rel="stylesheet" href="../stylesheets/style.css">
     <style>
         .edit-container { max-width: 500px; margin: 50px auto; padding: 30px; border: 1px solid #ddd; border-radius: 10px; }
         .form-group { margin-bottom: 15px; display: flex; flex-direction: column; }
@@ -19,7 +20,7 @@
     <h2>⚙️ 회원 정보 수정</h2>
     <p style="color: #888; font-size: 13px; margin-bottom: 20px;">변경할 항목만 입력하세요. 빈칸은 기존 정보가 유지됩니다.</p>
 
-    <form action="/user/edit" method="POST">
+    <form action="edit" method="POST">
         <div class="form-group">
             <label>아이디 (변경 불가)</label>
             <input type="text" name="username" value="<%= user.username %>" readonly>
@@ -50,7 +51,7 @@
         </div>
 
         <button type="submit" class="btn-submit">수정 완료하기</button>
-        <a href="/mypage" class="back-link">취소하고 마이페이지로</a>
+        <a href="../mypage" class="back-link">취소하고 마이페이지로</a>
     </form>
 </div>
 </body>

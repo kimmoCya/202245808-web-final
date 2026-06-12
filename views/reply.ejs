@@ -128,7 +128,7 @@
         <strong>원글</strong> <span><%= parentTitle %></span>
     </div>
 
-    <form action="/board/create" method="post">
+    <form action="../create" method="post">
         <input type="hidden" name="parent_id" value="<%= parentId %>">
 
         <label for="author">👤 작성자</label>
@@ -141,8 +141,7 @@
         <textarea id="content" name="content" placeholder="답글 내용을 상세히 작성해 주세요." rows="10" required></textarea>
 
         <div class="form-actions">
-            <!-- 목록 대신 원래 보던 상세 글로 바로 돌아갈 수 있게 센스있게 주소를 맞춰줍니다 -->
-            <a href="/board/view/<%= parentId %>" class="btn-back">← 원글로 돌아가기</a>
+            <a href="../view/<%= parentId %>" class="btn-back">← 원글로 돌아가기</a>
             <button type="submit" class="btn-submit">💚 답글 등록</button>
         </div>
     </form>
