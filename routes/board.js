@@ -19,7 +19,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-// 게시판 목록 조회 (공지사항 상단 고정 및 계층형 정렬 반영)
+// 주소창: .../stud19/board
 router.get('/', (req, res) => {
     const query = `
         SELECT p.*, 
@@ -37,12 +37,11 @@ router.get('/', (req, res) => {
     });
 });
 
-// 글쓰기 폼
+// 주소창: .../stud19/board/new
 router.get('/new', (req, res) => {
     res.render('post', { post: null, parentId: null });
 });
 
-// 글쓰기 처리
 router.post('/new', upload.single('attachment'), (req, res) => {
     const { title, content, parent_id, is_notice } = req.body;
     const author = req.session.user?.username || '익명';
@@ -63,19 +62,19 @@ router.post('/new', upload.single('attachment'), (req, res) => {
                     [postId, filename, filepath],
                     (err2) => {
                         if (err2) console.error('파일 저장 오류:', err2.message);
-                        // ⭕ [교정] 주소창: /board/new (2단계) -> 위로 한 칸 탈출한 후 board로 귀환 (../board)
-                        res.redirect('../board');
+                        // 주소창 /board/new (3단계)에서 /board 이동
+                        res.redirect('../');
                     }
                 );
             } else {
-                // ⭕ [교정] 주소창: /board/new (2단계) -> 위로 한 칸 탈출한 후 board로 귀환 (../board)
-                res.redirect('../board');
+                // 주소창 /board/new (3단계)에서 /board 이동
+                res.redirect('../');
             }
         }
     );
 });
 
-// 글 상세 조회
+// 주소창: .../stud19/board/view/:id
 router.get('/view/:id', (req, res) => {
     const postId = req.params.id;
 
@@ -93,7 +92,7 @@ router.get('/view/:id', (req, res) => {
     });
 });
 
-// 답글 달기 폼
+// 주소창: .../stud19/board/reply/:id
 router.get('/reply/:id', (req, res) => {
     const parentId = req.params.id;
     db.get("SELECT title FROM posts WHERE id = ?", [parentId], (err, row) => {
@@ -106,7 +105,6 @@ router.get('/reply/:id', (req, res) => {
     });
 });
 
-// 댓글 및 답글 등록 처리
 router.post('/create', (req, res) => {
     const { author, title, content, parent_id } = req.body;
     db.run(
@@ -116,17 +114,17 @@ router.post('/create', (req, res) => {
             if (err) return res.send('등록 실패');
 
             if (parent_id) {
-                // ⭕ [교정] 주소창: /board/create (2단계) -> 한 단계 위 부모 폴더에서 view/:id 호출 (../board/view/:id)
-                res.redirect('../board/view/' + parent_id);
+                // 주소창 /board/create (3단계)에서 /board/view/:id 이동
+                res.redirect('view/' + parent_id);
             } else {
-                // ⭕ [교정] 주소창: /board/create (2단계) -> 한 단계 위 부모 폴더에서 board 리스트 호출 (../board)
-                res.redirect('../board');
+                // 주소창 /board/create (3단계)에서 /board 이동
+                res.redirect('../');
             }
         }
     );
 });
 
-// 수정 폼
+// 주소창: .../stud19/board/edit/:id
 router.get('/edit/:id', (req, res) => {
     db.get('SELECT * FROM posts WHERE id = ?', [req.params.id], (err, post) => {
         if (err || !post) return res.send('글 없음');
@@ -134,7 +132,6 @@ router.get('/edit/:id', (req, res) => {
     });
 });
 
-// 수정 처리
 router.post('/edit/:id', (req, res) => {
     const { title, content } = req.body;
     db.run(
@@ -142,13 +139,12 @@ router.post('/edit/:id', (req, res) => {
         [title, content, req.params.id],
         (err) => {
             if (err) return res.send('수정 실패');
-            // ⭕ [교정] 주소창: /board/edit/:id (3단계 파라미터 계층) -> 부모 계층을 고려하여 한 단계 위 스코프의 view 호출 (../view/:id)
+            // 주소창 /board/edit/:id (4단계)에서 /board/view/:id 이동
             res.redirect('../view/' + req.params.id);
         }
     );
 });
 
-// 삭제 처리 (관리자 전용)
 router.get('/delete/:id', (req, res) => {
     const postId = req.params.id;
     const currentUser = req.session.user;
@@ -159,8 +155,8 @@ router.get('/delete/:id', (req, res) => {
 
     db.run('DELETE FROM posts WHERE id = ?', [postId], (err) => {
         if (err) return res.send('삭제 실패');
-        // ⭕ [교정] 주소창: /board/delete/:id (3단계 파라미터 계층) -> 두 단계 거슬러 올라가 상위의 board 목록으로 회군 (../../board)
-        res.redirect('../../board');
+        // 주소창 /board/delete/:id (4단계)에서 /board 이동
+        res.redirect('../../');
     });
 });
 

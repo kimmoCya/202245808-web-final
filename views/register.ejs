@@ -222,6 +222,7 @@
 </head>
 <body>
 
+<!-- 주소창: .../stud19/user/register (3단계 깊이 스코프) -->
 <div class="top-utility-bar">
     <% if (typeof user !== 'undefined' && user) { %>
         <span class="user-welcome">안녕하세요, <strong><%= user.username %></strong>님!</span>
@@ -253,6 +254,7 @@
         <h2>회원가입</h2>
         <p class="register-sub-text">회원정보를 입력해 주시면 청량한 혜택이 시작됩니다.</p>
 
+        <!-- 주소창 /user/register 에서 user.js의 router.post('/register') 호출 -->
         <form action="" method="post">
 
             <div class="form-group">
@@ -293,6 +295,7 @@
             <button type="submit" class="btn-register-submit">가입하기</button>
         </form>
 
+        <!-- 주소창 /user/register 에서 최상위 루트 홈으로 아웃 계층 매핑 -->
         <a href="../" class="link-back-home">🏠 메인으로 돌아가기</a>
     </div>
 

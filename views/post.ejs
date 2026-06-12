@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= post ? '글 수정' : (parentId ? '답글 작성' : '새 글 작성') %></title>
     <style>
-        /* 💡 세련되고 깔끔한 입력 폼 테마 CSS */
         body {
             font-family: 'Noto Sans KR', sans-serif;
             margin: 0;
@@ -41,7 +40,6 @@
             margin-bottom: 8px;
         }
 
-        /* 텍스트 인풋 & 본문 텍스트에리어 튜닝 */
         input[type="text"], textarea {
             width: 100%;
             padding: 12px;
@@ -59,7 +57,6 @@
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
-        /* 파일 첨부 영역 스타일 */
         .file-upload-box {
             background-color: #f8fafc;
             border: 1px dashed #cbd5e1;
@@ -72,7 +69,6 @@
             color: #64748b;
         }
 
-        /* 하단 버튼 제어반 */
         .form-actions {
             display: flex;
             justify-content: space-between;
@@ -120,7 +116,7 @@
 <div class="form-container">
     <h2>📝 <%= post ? '글 수정' : (parentId ? '답글 작성' : '새 글 작성') %></h2>
 
-    <form action="<%= post ? '../edit/' + post.id : (parentId ? '../new' : 'new') %>" method="post" enctype="multipart/form-data">
+    <form action="<%= post ? '' : (parentId ? '../reply/' + parentId : '') %>" method="post" enctype="multipart/form-data">
         <input type="hidden" name="parent_id" value="<%= post ? post.parent_id : parentId %>">
 
         <label for="title">📝 제목</label>

@@ -182,7 +182,7 @@
         if(newStatus === '메인 추천 노출중') selectElement.classList.add('featured');
         else selectElement.classList.remove('featured');
 
-        // ⭕ [교정 완결] 구문 오류 마감 괄호 및 리다이렉트 무결성 체인 바인딩 완료
+        // 주소창: .../stud19/admin/products 에서 admin.js의 router.post('/products/edit/:id') 호출
         fetch('products/edit/' + productId, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -196,7 +196,7 @@
 
     function deleteProduct(productId) {
         if (confirm('이 음료 상품을 대장에서 즉시 삭제하시겠습니까?')) {
-            // ⭕ [교정 완결] 백엔드의 router.post('/products/delete/:id') 규칙과 정확히 바인딩 연동
+            // 주소창: .../stud19/admin/products 에서 admin.js의 router.post('/products/delete/:id') 호출
             fetch('products/delete/' + productId, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' }

@@ -3,17 +3,15 @@ const router = express.Router();
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
-// [상대경로 완벽 고정] 어떤 폴더 환경에서 실행되든 현재 파일 위치 기준으로 DB를 추적합니다.
 const dbPath = path.resolve(__dirname, '../db/database.sqlite');
 const db = new sqlite3.Database(dbPath);
 
-// 주문 내역 조회
+// 주소창: .../stud19/order/history
 router.get('/history', (req, res) => {
     const sessionUser = req.session.user;
 
     if (!sessionUser) {
-        // ⭕ [교정] 주소창: /order/history (2단계 깊이) -> 부모 밖으로 한 칸 나가서 user/login 매핑 (../user/login)
-        return res.send('<script>alert("로그인이 필요합니다."); location.href="../user/login";</script>');
+        return res.status(401).send('로그인이 필요합니다.');
     }
 
     const query = `
@@ -66,14 +64,11 @@ router.get('/history', (req, res) => {
     });
 });
 
-// 주문서 작성 페이지 이동
+// 주소창: .../stud19/order/confirm
 router.post('/confirm', (req, res) => {
     const user = req.session.user;
 
-    if (!user) {
-        // ⭕ [교정] 주소창: /order/confirm (2단계 깊이) -> 부모 밖으로 한 칸 탈출 후 user/login 매핑 (../user/login)
-        return res.send('<script>alert("로그인이 필요합니다."); location.href="../user/login";</script>');
-    }
+    if (!user) return res.status(401).send('로그인이 필요합니다.');
 
     const query = `
         SELECT p.id AS product_id, p.name, p.price, p.emoji, p.image, c.quantity
@@ -83,8 +78,7 @@ router.post('/confirm', (req, res) => {
 
     db.all(query, [user.id], (err, cartRows) => {
         if (err || !cartRows || cartRows.length === 0) {
-            // ⭕ [교정] 주소창: /order/confirm (2단계 깊이) -> 부모 밖으로 탈출 후 1단계 cart 메인 매핑 (../cart)
-            return res.send('<script>alert("장바구니가 비어 있거나 상품 정보 조회에 실패하여 주문을 진행할 수 없습니다."); location.href="../cart";</script>');
+            return res.redirect('../cart');
         }
 
         const orderItems = cartRows.map(row => {
@@ -108,7 +102,7 @@ router.post('/confirm', (req, res) => {
     });
 });
 
-// 결제 처리 완료 로직
+// 주소창: .../stud19/order/checkout
 router.post('/checkout', (req, res) => {
     const user = req.session.user;
 
@@ -122,8 +116,7 @@ router.post('/checkout', (req, res) => {
 
     db.all(query, [user.id], (err, cartRows) => {
         if (err || !cartRows || cartRows.length === 0) {
-            // ⭕ [교정] 주소창: /order/checkout (2단계 깊이) -> 부모 밖의 cart 메인으로 탈출 복귀 (../cart)
-            return res.send('<script>alert("주문할 상품이 존재하지 않습니다."); location.href="../cart";</script>');
+            return res.redirect('../cart');
         }
 
         let totalPrice = 0;
@@ -146,8 +139,7 @@ router.post('/checkout', (req, res) => {
 
                     db.run('DELETE FROM cart_items WHERE user_id = ?', [user.id], (err3) => {
                         if (err3) console.error('장바구니 비우기 오류:', err3.message);
-                        // ⭕ [교정] 주소창: /order/checkout (2단계 깊이) -> 부모 밖 한 단계 위 스코프인 mypage 메인으로 정상 안착 (../mypage)
-                        res.send('<script>alert("주문 및 결제가 완료되었습니다."); location.href="../mypage";</script>');
+                        res.redirect('../mypage');
                     });
                 });
             });
@@ -155,7 +147,7 @@ router.post('/checkout', (req, res) => {
     });
 });
 
-// 주문 취소 처리 로직 (배송준비중 상태의 주문 정보 삭제)
+// 주소창: .../stud19/order/cancel
 router.post('/cancel', (req, res) => {
     const user = req.session.user;
     const { orderId } = req.body;
@@ -166,8 +158,7 @@ router.post('/cancel', (req, res) => {
         if (err || !row) return res.status(404).send('주문 정보를 찾을 수 없습니다.');
 
         if (row.status !== '배송준비중') {
-            // ⭕ [교정] 주소창: /order/cancel (2단계 깊이) -> 현재 order 부모 스코프 내 선상에 위치한 history 파일 상대 호출 (history)
-            return res.send('<script>alert("이미 배송이 진행 중인 상품은 취소가 불가능합니다."); location.href="history";</script>');
+            return res.redirect('history');
         }
 
         db.serialize(() => {
@@ -176,8 +167,7 @@ router.post('/cancel', (req, res) => {
 
                 db.run('DELETE FROM orders WHERE id = ? AND user_id = ?', [orderId, user.id], (err2) => {
                     if (err2) return res.status(500).send('주문 취소 에러');
-                    // ⭕ [교정] 주소창: /order/cancel (2단계 깊이) -> 현재 order 폴더 내부와 동일선상이므로 앞 슬래시 걷어내고 history 즉시 연결 (history)
-                    res.send('<script>alert("주문이 정상적으로 취소 및 환불 처리되었습니다."); location.href="history";</script>');
+                    res.redirect('history');
                 });
             });
         });

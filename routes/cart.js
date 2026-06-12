@@ -6,7 +6,7 @@ const path = require('path');
 const dbPath = path.resolve(__dirname, '../db/database.sqlite');
 const db = new sqlite3.Database(dbPath);
 
-// 장바구니에 담기
+// 주소창: .../stud19/cart/add
 router.post('/add', (req, res) => {
     const user = req.session.user;
     const productId = req.body.productId;
@@ -14,7 +14,6 @@ router.post('/add', (req, res) => {
     if (!user) {
         return res.status(401).render('login_required', {
             message: '장바구니 담기 위해서는 로그인이 필요합니다.',
-            // ⭕ [교정] 주소창: /cart/add (2단계) -> 한 단계 위 부모 계층에서 user/login 매핑 (../user/login)
             redirectUrl: '../user/login'
         });
     }
@@ -28,24 +27,14 @@ router.post('/add', (req, res) => {
             console.error('장바구니 추가 오류:', err.message);
             return res.status(500).send('장바구니 추가 실패');
         }
-
-        res.send(`
-            <script>
-                if (confirm("장바구니에 상품이 정상적으로 담겼습니다.\\n장바구니 페이지로 이동하시겠습니까?")) {
-                    // ⭕ [교정] 주소창: /cart/add (2단계) -> 한 단계 위 부모 폴더에서 cart 메인 리스트 바인딩 (../cart)
-                    location.href = "../cart";
-                } else {
-                    history.back();
-                }
-            </script>
-        `);
+        // 주소창 /cart/add (3단계)에서 /cart 이동
+        res.redirect('../');
     });
 });
 
-// 장바구니 목록 조회
+// 주소창: .../stud19/cart
 router.get('/', (req, res) => {
     const user = req.session.user;
-    // ⭕ [교정] 주소창: /cart (1단계 메인 깊이) -> 현재 계층 기준 동일 선상의 user/login 경로 호출 (user/login)
     if (!user) return res.redirect('user/login');
 
     const query = `
@@ -60,10 +49,9 @@ router.get('/', (req, res) => {
     });
 });
 
-// 장바구니 수량 조절
+// 주소창: .../stud19/cart/update
 router.post('/update', (req, res) => {
     if (!req.session.user) {
-        // ⭕ [교정] 주소창: /cart/update (2단계) -> 한 단계 위 부모 폴더 기준으로 login_required 렌더링용 리다이렉트
         return res.redirect('../login_required');
     }
     const userId = req.session.user.id;
@@ -84,24 +72,21 @@ router.post('/update', (req, res) => {
 
         if (newQuantity <= 0) {
             db.run(`DELETE FROM cart_items WHERE user_id = ? AND product_id = ?`, [userId, productId], (err) => {
-                // ⭕ [교정] 주소창: /cart/update (2단계) -> 한 단계 위 부모 디렉토리인 cart 리스트 메인으로 복귀 (../cart)
-                return res.redirect('../cart');
+                return res.redirect('../');
             });
         } else {
             db.run(`UPDATE cart_items SET quantity = ? WHERE user_id = ? AND product_id = ?`, [newQuantity, userId, productId], (err) => {
-                // ⭕ [교정] 주소창: /cart/update (2단계) -> 한 단계 위 부모 디렉토리인 cart 리스트 메인으로 복귀 (../cart)
-                return res.redirect('../cart');
+                return res.redirect('../');
             });
         }
     });
 });
 
-// 장바구니 항목 전체 삭제
+// 주소창: .../stud19/cart/delete
 router.post('/delete', (req, res) => {
     const user = req.session.user;
     const { productId } = req.body;
 
-    // ⭕ [교정] 주소창: /cart/delete (2단계) -> 한 단계 위 부모 계층 밖의 user/login 타겟팅 (../user/login)
     if (!user) return res.redirect('../user/login');
 
     const query = `DELETE FROM cart_items WHERE user_id = ? AND product_id = ?`;
@@ -109,8 +94,7 @@ router.post('/delete', (req, res) => {
         if (err) {
             return res.status(500).send('삭제 실패');
         }
-        // ⭕ [교정] 주소창: /cart/delete (2단계) -> 한 단계 위 부모 디렉토리인 cart 리스트 메인으로 회군 (../cart)
-        res.redirect('../cart');
+        res.redirect('../');
     });
 });
 

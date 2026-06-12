@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>글 수정 - 고객센터</title>
     <style>
-        /* 💡 기존 답글 폼과 일체감을 주는 네이버 카페풍 UI 디자인 */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", "맑은 고딕", helvetica, "Apple SD Gothic Neo", sans-serif;
             margin: 0;
@@ -30,7 +29,7 @@
             color: #1e293b;
             margin-top: 0;
             margin-bottom: 25px;
-            border-left: 5px solid #10b981; /* 싱그러운 초록 포인트 배너 */
+            border-left: 5px solid #10b981;
             padding-left: 12px;
         }
 
@@ -42,7 +41,6 @@
             margin-bottom: 8px;
         }
 
-        /* 폼 입력 상자 디자인 단일화 조율 */
         input[type="text"], textarea {
             width: 100%;
             padding: 12px;
@@ -61,7 +59,6 @@
             box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
         }
 
-        /* 하단 버튼 킷 구성 */
         .form-actions {
             display: flex;
             justify-content: space-between;
@@ -70,7 +67,7 @@
         }
 
         .btn-submit {
-            background-color: #10b981; /* 네이버 시그니처 초록 버튼 */
+            background-color: #10b981;
             color: white;
             border: none;
             padding: 10px 24px;
@@ -109,7 +106,7 @@
 <div class="edit-container">
     <h2>✏️ 글 수정</h2>
 
-    <form action="../edit/<%= post.id %>" method="post">
+    <form action="" method="post">
 
         <label for="title">📝 제목</label>
         <input type="text" id="title" name="title" placeholder="수정할 제목을 입력하세요" value="<%= post.title %>" required>
