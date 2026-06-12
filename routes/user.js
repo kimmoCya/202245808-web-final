@@ -1,9 +1,11 @@
 const express = require('express');
+// ⭕ [오류 해결] 비밀번호 해싱 및 매칭 검증을 위한 bcrypt 모듈 가져오기 선언 완료!
+const bcrypt = require('bcrypt');
 const router = express.Router();
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
-// [상대경로 완벽 고정] 어떤 폴더 환경에서 실행되든 현재 파일 위치 기준으로 DB를 추적합니다.
+// [상대경로 완벽 고정] 실행 위치와 관계없이 현재 파일 폴더 기준으로 DB 경로를 추적합니다.
 const dbPath = path.resolve(__dirname, '../db/database.sqlite');
 const db = new sqlite3.Database(dbPath);
 
@@ -78,7 +80,7 @@ router.post('/login', (req, res) => {
                 phone: user.phone,
                 address: user.address
             };
-            // ⭕ [교정] 주소창: /user/login (2단계 깊이) -> 부모 계층 구조 밖 한 칸 위인 최상위 배포 홈 루트(stud19/)로 안전 귀환
+            // ⭕ [교정] 주소창: /user/login (2단계 깊이) -> 부모 계층 구조 밖 한 칸 위인 최상위 배포 홈 루트로 안전 귀환
             return res.redirect('../');
         } else {
             return res.send('<script>alert("비밀번호가 일치하지 않습니다. 다시 확인해 주세요."); history.back();</script>');
