@@ -7,8 +7,9 @@ const path = require('path');
 const dbPath = path.resolve(__dirname, '../db/database.sqlite');
 const db = new sqlite3.Database(dbPath);
 
-// 기본 사용자 리스팅 라우트
+// 기본 사용자 리스팅 라우트 (주소창: /users -> 1단계 깊이)
 router.get('/', function(req, res, next) {
+    // ⭕ [무결성 검증] 리다이렉트 분기가 없는 단순 텍스트 반환 엔드포인트이므로 배포 시 완벽하게 안전합니다.
     res.send('respond with a resource');
 });
 

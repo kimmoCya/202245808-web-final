@@ -12,14 +12,16 @@ router.get('/', (req, res) => {
     const sessionUser = req.session.user;
 
     if (!sessionUser) {
-        return res.redirect('/user/login');
+        // ⭕ [교정] 주소창: /mypage (1단계) -> 현재 위치 기준으로 user/login을 상대 매핑하여 이동 (user/login)
+        return res.redirect('user/login');
     }
 
     // 탈퇴 여부 검증을 포함한 유저 데이터 단건 조회
     db.get('SELECT * FROM users WHERE username = ? AND is_withdrawn = 0', [sessionUser.username], (err, user) => {
         if (err || !user) {
             console.error('마이페이지 조회 오류:', err);
-            return res.send('<script>alert("사용자 정보를 불러올 수 없거나 탈퇴된 계정입니다."); location.href="/";</script>');
+            // ⭕ [교정] 주소창: /mypage (1단계) -> 현재 위치 기준 동일 선상의 최상위 홈 루트로 이동 (./)
+            return res.send('<script>alert("사용자 정보를 불러올 수 없거나 탈퇴된 계정입니다."); location.href="./";</script>');
         }
 
         res.render('mypage', { user: user });
@@ -41,7 +43,8 @@ router.post('/withdraw', (req, res) => {
         // 데이터 업데이트 성공 후 활성화된 세션 컨텍스트 파기
         req.session.destroy((sessionErr) => {
             if (sessionErr) console.error('세션 파기 오류:', sessionErr);
-            res.send('<script>alert("회원 탈퇴가 정상적으로 완료되었습니다. 그동안 이용해 주셔서 감사합니다."); location.href="/";</script>');
+            // ⭕ [교정] 주소창: /mypage/withdraw (2단계 깊이) -> 부모 계층 구조를 거슬러 올라가 최상위 홈 루트로 안착 (../)
+            res.send('<script>alert("회원 탈퇴가 정상적으로 완료되었습니다. 그동안 이용해 주셔서 감사합니다."); location.href="../";</script>');
         });
     });
 });

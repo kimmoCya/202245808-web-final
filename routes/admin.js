@@ -11,7 +11,8 @@ function isAdmin(req, res, next) {
     if (user && user.role === 'ADMIN') {
         next();
     } else {
-        res.send('<script>alert("접근 권한이 없습니다. 관리자만 가능합니다."); location.href="/";</script>');
+        // ⭕ [교정] 주소창: /admin (2단계 깊이) -> 한 단계 위 부모 계층인 최상위 배포 루트(stud19/)로 이동
+        res.send('<script>alert("접근 권한이 없습니다. 관리자만 가능합니다."); location.href="../";</script>');
     }
 }
 
@@ -32,7 +33,8 @@ router.post('/user/update-role', (req, res) => {
     const { userId, role } = req.body;
     db.run('UPDATE users SET role = ? WHERE id = ?', [role, userId], (err) => {
         if (err) return res.status(500).send('등급 변경 에러');
-        res.send('<script>alert("회원 등급이 성공적으로 업데이트되었습니다."); location.href="/admin/users";</script>');
+        // ⭕ [교정] 주소창: /admin/user/update-role (3단계 깊이) -> 한 단계 위 부모 폴더에서 users 매핑 (admin/users)
+        res.send('<script>alert("회원 등급이 성공적으로 업데이트되었습니다."); location.href="../users";</script>');
     });
 });
 
@@ -40,7 +42,8 @@ router.post('/user/kick', (req, res) => {
     const { userId } = req.body;
     db.run('UPDATE users SET is_withdrawn = 1 WHERE id = ?', [userId], (err) => {
         if (err) return res.status(500).send('회원 강제 탈퇴 에러');
-        res.send('<script>alert("해당 회원이 강제 탈퇴 처리되었습니다."); location.href="/admin/users";</script>');
+        // ⭕ [교정] 주소창: /admin/user/kick (3단계 깊이) -> 한 단계 위 부모 폴더에서 users 매핑 (admin/users)
+        res.send('<script>alert("해당 회원이 강제 탈퇴 처리되었습니다."); location.href="../users";</script>');
     });
 });
 
@@ -61,7 +64,8 @@ router.post('/products/add', (req, res) => {
     const query = `INSERT INTO products (name, price, emoji, description, image, status) VALUES (?, ?, ?, ?, ?, ?)`;
     db.run(query, [name, price, emoji, description, image || 'default.png', status || '일반'], (err) => {
         if (err) return res.status(500).send('상품 추가 에러');
-        res.send('<script>alert("신규 상품이 등록되었습니다."); location.href="/admin/products";</script>');
+        // ⭕ [교정] 주소창: /admin/products/add (3단계 깊이) -> 한 단계 위 부모 폴더에서 products 매핑 (admin/products)
+        res.send('<script>alert("신규 상품이 등록되었습니다."); location.href="../products";</script>');
     });
 });
 
@@ -80,7 +84,8 @@ router.post('/products/edit/:id', (req, res) => {
     const query = `UPDATE products SET name = ?, price = ?, emoji = ?, description = ?, image = ?, status = ? WHERE id = ?`;
     db.run(query, [name, price, emoji, description, image || 'default.png', status, productId], (err) => {
         if (err) return res.status(500).send('상품 수정 에러');
-        res.send('<script>alert("상품 정보가 수정되었습니다."); location.href="/admin/products";</script>');
+        // ⭕ [교정] 주소창: /admin/products/edit/:id (4단계 깊이) -> 부모 계층 구조를 두 번 거슬러 올라가야 하므로 ../../products 매핑
+        res.send('<script>alert("상품 정보가 수정되었습니다."); location.href="../../products";</script>');
     });
 });
 
@@ -118,7 +123,8 @@ router.post('/orders/update-batch', (req, res) => {
     let { orderIds, newStatuses } = req.body;
 
     if (!orderIds || !newStatuses) {
-        return res.send('<script>alert("수정할 내역이 없습니다."); location.href="/admin/orders";</script>');
+        // ⭕ [교정] 주소창: /admin/orders/update-batch (3단계 깊이) -> 한 단계 위 부모 폴더에서 orders 매핑 (admin/orders)
+        return res.send('<script>alert("수정할 내역이 없습니다."); location.href="../orders";</script>');
     }
 
     if (!Array.isArray(orderIds)) {
@@ -133,7 +139,8 @@ router.post('/orders/update-batch', (req, res) => {
         }
         stmt.finalize((err) => {
             if (err) return res.status(500).send('일괄 수정 실패');
-            res.send('<script>alert("배송 상태가 일괄 적용되었습니다."); location.href="/admin/orders";</script>');
+            // ⭕ [교정] 주소창: /admin/orders/update-batch (3단계 깊이) -> 한 단계 위 부모 폴더에서 orders 매핑 (admin/orders)
+            res.send('<script>alert("배송 상태가 일괄 적용되었습니다."); location.href="../orders";</script>');
         });
     });
 });

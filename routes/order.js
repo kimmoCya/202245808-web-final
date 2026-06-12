@@ -12,7 +12,8 @@ router.get('/history', (req, res) => {
     const sessionUser = req.session.user;
 
     if (!sessionUser) {
-        return res.send('<script>alert("로그인이 필요합니다."); location.href="/user/login";</script>');
+        // ⭕ [교정] 주소창: /order/history (2단계 깊이) -> 부모 밖으로 한 칸 나가서 user/login 매핑 (../user/login)
+        return res.send('<script>alert("로그인이 필요합니다."); location.href="../user/login";</script>');
     }
 
     const query = `
@@ -70,7 +71,8 @@ router.post('/confirm', (req, res) => {
     const user = req.session.user;
 
     if (!user) {
-        return res.send('<script>alert("로그인이 필요합니다."); location.href="/user/login";</script>');
+        // ⭕ [교정] 주소창: /order/confirm (2단계 깊이) -> 부모 밖으로 한 칸 탈출 후 user/login 매핑 (../user/login)
+        return res.send('<script>alert("로그인이 필요합니다."); location.href="../user/login";</script>');
     }
 
     const query = `
@@ -81,7 +83,8 @@ router.post('/confirm', (req, res) => {
 
     db.all(query, [user.id], (err, cartRows) => {
         if (err || !cartRows || cartRows.length === 0) {
-            return res.send('<script>alert("장바구니가 비어 있거나 상품 정보 조회에 실패하여 주문을 진행할 수 없습니다."); location.href="/cart";</script>');
+            // ⭕ [교정] 주소창: /order/confirm (2단계 깊이) -> 부모 밖으로 탈출 후 1단계 cart 메인 매핑 (../cart)
+            return res.send('<script>alert("장바구니가 비어 있거나 상품 정보 조회에 실패하여 주문을 진행할 수 없습니다."); location.href="../cart";</script>');
         }
 
         const orderItems = cartRows.map(row => {
@@ -119,7 +122,8 @@ router.post('/checkout', (req, res) => {
 
     db.all(query, [user.id], (err, cartRows) => {
         if (err || !cartRows || cartRows.length === 0) {
-            return res.send('<script>alert("주문할 상품이 존재하지 않습니다."); location.href="/cart";</script>');
+            // ⭕ [교정] 주소창: /order/checkout (2단계 깊이) -> 부모 밖의 cart 메인으로 탈출 복귀 (../cart)
+            return res.send('<script>alert("주문할 상품이 존재하지 않습니다."); location.href="../cart";</script>');
         }
 
         let totalPrice = 0;
@@ -142,7 +146,8 @@ router.post('/checkout', (req, res) => {
 
                     db.run('DELETE FROM cart_items WHERE user_id = ?', [user.id], (err3) => {
                         if (err3) console.error('장바구니 비우기 오류:', err3.message);
-                        res.send('<script>alert("주문 및 결제가 완료되었습니다."); location.href="/mypage";</script>');
+                        // ⭕ [교정] 주소창: /order/checkout (2단계 깊이) -> 부모 밖 한 단계 위 스코프인 mypage 메인으로 정상 안착 (../mypage)
+                        res.send('<script>alert("주문 및 결제가 완료되었습니다."); location.href="../mypage";</script>');
                     });
                 });
             });
@@ -161,7 +166,8 @@ router.post('/cancel', (req, res) => {
         if (err || !row) return res.status(404).send('주문 정보를 찾을 수 없습니다.');
 
         if (row.status !== '배송준비중') {
-            return res.send('<script>alert("이미 배송이 진행 중인 상품은 취소가 불가능합니다."); location.href="/order/history";</script>');
+            // ⭕ [교정] 주소창: /order/cancel (2단계 깊이) -> 현재 order 부모 스코프 내 선상에 위치한 history 파일 상대 호출 (history)
+            return res.send('<script>alert("이미 배송이 진행 중인 상품은 취소가 불가능합니다."); location.href="history";</script>');
         }
 
         db.serialize(() => {
@@ -170,7 +176,8 @@ router.post('/cancel', (req, res) => {
 
                 db.run('DELETE FROM orders WHERE id = ? AND user_id = ?', [orderId, user.id], (err2) => {
                     if (err2) return res.status(500).send('주문 취소 에러');
-                    res.send('<script>alert("주문이 정상적으로 취소 및 환불 처리되었습니다."); location.href="/order/history";</script>');
+                    // ⭕ [교정] 주소창: /order/cancel (2단계 깊이) -> 현재 order 폴더 내부와 동일선상이므로 앞 슬래시 걷어내고 history 즉시 연결 (history)
+                    res.send('<script>alert("주문이 정상적으로 취소 및 환불 처리되었습니다."); location.href="history";</script>');
                 });
             });
         });

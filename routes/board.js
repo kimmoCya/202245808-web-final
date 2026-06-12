@@ -63,11 +63,13 @@ router.post('/new', upload.single('attachment'), (req, res) => {
                     [postId, filename, filepath],
                     (err2) => {
                         if (err2) console.error('파일 저장 오류:', err2.message);
-                        res.redirect('/board');
+                        // ⭕ [교정] 주소창: /board/new (2단계) -> 위로 한 칸 탈출한 후 board로 귀환 (../board)
+                        res.redirect('../board');
                     }
                 );
             } else {
-                res.redirect('/board');
+                // ⭕ [교정] 주소창: /board/new (2단계) -> 위로 한 칸 탈출한 후 board로 귀환 (../board)
+                res.redirect('../board');
             }
         }
     );
@@ -114,9 +116,11 @@ router.post('/create', (req, res) => {
             if (err) return res.send('등록 실패');
 
             if (parent_id) {
-                res.redirect('/board/view/' + parent_id);
+                // ⭕ [교정] 주소창: /board/create (2단계) -> 한 단계 위 부모 폴더에서 view/:id 호출 (../board/view/:id)
+                res.redirect('../board/view/' + parent_id);
             } else {
-                res.redirect('/board');
+                // ⭕ [교정] 주소창: /board/create (2단계) -> 한 단계 위 부모 폴더에서 board 리스트 호출 (../board)
+                res.redirect('../board');
             }
         }
     );
@@ -138,7 +142,8 @@ router.post('/edit/:id', (req, res) => {
         [title, content, req.params.id],
         (err) => {
             if (err) return res.send('수정 실패');
-            res.redirect('/board/view/' + req.params.id);
+            // ⭕ [교정] 주소창: /board/edit/:id (3단계 파라미터 계층) -> 부모 계층을 고려하여 한 단계 위 스코프의 view 호출 (../view/:id)
+            res.redirect('../view/' + req.params.id);
         }
     );
 });
@@ -154,7 +159,8 @@ router.get('/delete/:id', (req, res) => {
 
     db.run('DELETE FROM posts WHERE id = ?', [postId], (err) => {
         if (err) return res.send('삭제 실패');
-        res.redirect('/board');
+        // ⭕ [교정] 주소창: /board/delete/:id (3단계 파라미터 계층) -> 두 단계 거슬러 올라가 상위의 board 목록으로 회군 (../../board)
+        res.redirect('../../board');
     });
 });
 

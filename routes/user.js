@@ -1,11 +1,9 @@
 const express = require('express');
-const bcrypt = require('bcrypt');
+const router = express.Router();
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
-const router = express.Router();
-
-// [상대경로 완벽 고정] 실행 위치와 관계없이 현재 파일 폴더 기준으로 DB 경로를 추적합니다.
+// [상대경로 완벽 고정] 어떤 폴더 환경에서 실행되든 현재 파일 위치 기준으로 DB를 추적합니다.
 const dbPath = path.resolve(__dirname, '../db/database.sqlite');
 const db = new sqlite3.Database(dbPath);
 
@@ -28,7 +26,8 @@ router.post('/register', async (req, res) => {
                 return res.send(`
                     <script>
                         alert("과거에 탈퇴하신 계정입니다. 해당 아이디를 복구하시려면 로그인 창에서 기존 비밀번호로 로그인해 주세요.");
-                        top.location.href = "/user/login";
+                        // ⭕ [교정] 주소창: /user/register (2단계 깊이) -> 현재 user 폴더 내부의 동일선상 login 파일 상대 호출
+                        top.location.href = "login";
                     </script>
                 `);
             }
@@ -40,7 +39,8 @@ router.post('/register', async (req, res) => {
             [username, hashedPassword, name, birth || null, address || null, phone || null, email || null],
             (insertErr) => {
                 if (insertErr) return res.send('<script>alert("가입 실패"); history.back();</script>');
-                res.redirect('/user/login');
+                // ⭕ [교정] 주소창: /user/register (2단계 깊이) -> 동일 폴더 내부 선상이므로 슬래시 떼고 파일명처럼 라우팅
+                res.redirect('login');
             }
         );
     });
@@ -57,7 +57,8 @@ router.post('/login', (req, res) => {
 
     db.get('SELECT * FROM users WHERE username = ?', [username], async (err, user) => {
         if (err || !user) {
-            return res.send('<script>alert("존재하지 않는 사용자입니다."); top.location.href="/user/login";</script>');
+            // ⭕ [교정] 주소창: /user/login (2단계 깊이) -> 동일 선상 파일이므로 슬래시 제거
+            return res.send('<script>alert("존재하지 않는 사용자입니다."); top.location.href="login";</script>');
         }
 
         const match = await bcrypt.compare(password, user.password);
@@ -77,7 +78,8 @@ router.post('/login', (req, res) => {
                 phone: user.phone,
                 address: user.address
             };
-            return res.redirect('/');
+            // ⭕ [교정] 주소창: /user/login (2단계 깊이) -> 부모 계층 구조 밖 한 칸 위인 최상위 배포 홈 루트(stud19/)로 안전 귀환
+            return res.redirect('../');
         } else {
             return res.send('<script>alert("비밀번호가 일치하지 않습니다. 다시 확인해 주세요."); history.back();</script>');
         }
@@ -92,7 +94,8 @@ router.post('/rejoin-submit', async (req, res) => {
     db.run('UPDATE users SET password = ?, is_withdrawn = 0 WHERE username = ?', [newHashedPassword, username], (err) => {
         if (err) {
             console.error('재가입 처리 오류:', err.message);
-            return res.send('<script>alert("복구 중 오류가 발생했습니다."); top.location.href="/user/login";</script>');
+            // ⭕ [교정] 주소창: /user/rejoin-submit (2단계 깊이) -> 동일한 부모 내부의 login 라우트 타겟팅
+            return res.send('<script>alert("복구 중 오류가 발생했습니다."); top.location.href="login";</script>');
         }
 
         db.get('SELECT * FROM users WHERE username = ?', [username], (searchErr, refreshedUser) => {
@@ -106,9 +109,11 @@ router.post('/rejoin-submit', async (req, res) => {
                     phone: refreshedUser.phone,
                     address: refreshedUser.address
                 };
-                return res.send('<script>alert("계정 및 기존 주문 내역이 복구되어 자동 로그인되었습니다."); top.location.href="/";</script>');
+                // ⭕ [교정] 주소창: /user/rejoin-submit (2단계 깊이) -> 부모 한 칸 밖 상위 최상단 홈 루트로 자동 복귀 매핑
+                return res.send('<script>alert("계정 및 기존 주문 내역이 복구되어 자동 로그인되었습니다."); top.location.href="../";</script>');
             }
-            res.redirect('/user/login');
+            // ⭕ [교정] 부모 폴더 내 선상의 login 호출
+            res.redirect('login');
         });
     });
 });
@@ -116,15 +121,17 @@ router.post('/rejoin-submit', async (req, res) => {
 // 로그아웃
 router.get('/logout', (req, res) => {
     req.session.destroy((err) => {
-        if (err) console.error('로그아웃 오류:', err);
-        res.redirect('/');
+        if (err) console.error('logout 에러:', err);
+        // ⭕ [교정] 주소창: /user/logout (2단계 깊이) -> 부모 폴더 밖 한 단계 위 상위 홈 루트 매핑 복귀
+        res.redirect('../');
     });
 });
 
 // 회원정보 수정 페이지
 router.get('/edit', (req, res) => {
     const sessionUser = req.session.user;
-    if (!sessionUser) return res.redirect('/user/login');
+    // ⭕ [교정] 주소창: /user/edit (2단계 깊이) -> 동일 계층 내부 파일 연결하므로 슬래시 삭제
+    if (!sessionUser) return res.redirect('login');
 
     db.get('SELECT * FROM users WHERE username = ? AND is_withdrawn = 0', [sessionUser.username], (err, row) => {
         if (err || !row) return res.send('사용자 정보를 찾을 수 없습니다.');
@@ -135,7 +142,8 @@ router.get('/edit', (req, res) => {
 // 회원정보 수정 처리
 router.post('/edit', async (req, res) => {
     const sessionUser = req.session.user;
-    if (!sessionUser) return res.redirect('/user/login');
+    // ⭕ [교정] 부모 내부 동일선상 login 바인딩
+    if (!sessionUser) return res.redirect('login');
 
     const { name, password, birth, address, phone, email } = req.body;
     const username = sessionUser.username;
@@ -172,7 +180,8 @@ router.post('/edit', async (req, res) => {
             req.session.user.email = finalEmail;
 
             req.session.save(() => {
-                res.send('<script>alert("회원 정보가 수정되었습니다."); top.location.href="/mypage";</script>');
+                // ⭕ [교정] 주소창: /user/edit (2단계 깊이) -> 부모 밖 한 단계 위 스코프의 마이페이지 메인으로 슛인 처리
+                res.send('<script>alert("회원 정보가 수정되었습니다."); top.location.href="../mypage";</script>');
             });
         });
     } catch (error) {
@@ -194,7 +203,8 @@ router.post('/withdraw-submit', (req, res) => {
 
         req.session.destroy((sessionErr) => {
             if (sessionErr) console.error('세션 파기 오류:', sessionErr);
-            res.send('<script>alert("회원 탈퇴가 완료되었습니다."); top.location.href="/";</script>');
+            // ⭕ [교정] 주소창: /user/withdraw-submit (2단계 깊이) -> 부모 한 계층 위 메인 홈 루트로 탈출 복귀
+            res.send('<script>alert("회원 탈퇴가 완료되었습니다."); top.location.href="../";</script>');
         });
     });
 });
@@ -210,7 +220,8 @@ router.post('/find-id', (req, res) => {
         return res.send(`
             <script>
                 alert("회원님의 아이디는 [ ${row.username} ] 입니다.");
-                top.location.href = "/user/login";
+                // ⭕ [교정] 동일한 부모 내부의 로그인 페이지 상대 바인딩
+                top.location.href = "login";
             </script>
         `);
     });
@@ -233,7 +244,8 @@ router.post('/find-pwd', (req, res) => {
             return res.send(`
                 <script>
                     alert("임시 비밀번호가 발급되었습니다.\\n\\n[ ${tempPassword} ]\\n\\n로그인 후 비밀번호를 변경해 주세요.");
-                    top.location.href = "/user/login";
+                    // ⭕ [교정] 동일한 부모 내부의 로그인 페이지 상대 바인딩
+                    top.location.href = "login";
                 </script>
             `);
         });

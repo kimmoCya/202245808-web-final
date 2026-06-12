@@ -1,4 +1,4 @@
-const express = require('express');
+\const express = require('express');
 const router = express.Router();
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
@@ -14,6 +14,9 @@ router.get('/', (req, res) => {
         if (err) {
             return res.status(500).send('추천 상품 불러오기 실패');
         }
+
+        // ⭕ [핵심 가드] 메인 홈 화면(/)은 1단계 가장 얕은 깊이입니다.
+        // 이 화면에서 로그인 버튼을 누르면 주소창은 현재 위치 뒤에 'user/login'이 붙은 상대 계층으로 안전하게 진입해야 합니다.
         res.render('index', {
             title: '내 쇼핑몰',
             featuredProducts,

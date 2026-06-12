@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
@@ -21,10 +19,10 @@ const mypageRouter = require('./routes/mypage');
 const wishlistRouter = require('./routes/wishlist');
 const adminRouter = require('./routes/admin');
 
-// 1. app 객체는 여기서 '딱 한 번만' 선언합니다.
+// app 객체 선언
 const app = express();
 
-// 실행 위치 관계없이 현재 엔트리 파일 기준으로 데이터베이스 절대경로 자동 매핑
+// SQLite 데이터베이스 연결 설정
 const dbPath = path.join(__dirname, 'db/database.sqlite');
 const db = new sqlite3.Database(dbPath, (err) => {
     if (err) console.error('DB 연결 오류:', err.message);
@@ -32,7 +30,7 @@ const db = new sqlite3.Database(dbPath, (err) => {
 });
 
 db.serialize(() => {
-    // 회원 테이블 초기화 및 스키마 정의
+    // 회원 테이블 초기화
     db.run(`
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -46,33 +44,32 @@ db.serialize(() => {
         )
     `);
 
-    // 관리자 기능 및 권한 제어를 위한 컬럼 추가
     db.run(`ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'USER'`, (err) => {});
     db.run(`ALTER TABLE users ADD COLUMN is_withdrawn INTEGER DEFAULT 0`, (err) => {});
 
-    // 위시리스트 스키마 정의
+    // 위시리스트 테이블 초기화
     db.run(`CREATE TABLE IF NOT EXISTS wishlist (
         id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, product_id INTEGER, created_at DATETIME DEFAULT CURRENT_TIMESTAMP, UNIQUE(user_id, product_id)
     )`);
 
-    // 주문 마스터 스키마 정의
+    // 주문 테이블 초기화
     db.run(`CREATE TABLE IF NOT EXISTS orders (
         id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, total_price INTEGER, created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`);
     db.run(`ALTER TABLE orders ADD COLUMN status TEXT DEFAULT '배송준비중'`, (err) => {});
 
-    // 주문 상세 항목 스키마 정의
+    // 주문 상세 항목 테이블 초기화
     db.run(`CREATE TABLE IF NOT EXISTS order_items (
         id INTEGER PRIMARY KEY AUTOINCREMENT, order_id INTEGER, product_id INTEGER, quantity INTEGER, price INTEGER
     )`);
 
-    // 상품 마스터 스키마 정의
+    // 상품 테이블 초기화
     db.run(`CREATE TABLE IF NOT EXISTS products (
         id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, price INTEGER, emoji TEXT, description TEXT, image TEXT, is_featured INTEGER DEFAULT 0, likes INTEGER DEFAULT 0
     )`);
     db.run(`ALTER TABLE products ADD COLUMN status TEXT DEFAULT '일반'`, (err) => {});
 
-    // 게시판 파일 데이터 스키마 정의
+    // 파일 테이블 초기화
     db.run(`
     CREATE TABLE IF NOT EXISTS files (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -81,9 +78,6 @@ db.serialize(() => {
       filepath TEXT
     )
     `);
-
-    // 게시판 상단 공지 제어 컬럼 추가
-    db.run(`ALTER TABLE posts ADD COLUMN is_notice INTEGER DEFAULT 0`, (err) => {});
 
     // 최고 관리자 마스터 계정 초기 시딩
     db.get("SELECT * FROM users WHERE username = 'admin'", async (err, row) => {
@@ -105,27 +99,49 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(session({ secret: 'secret-key', resave: false, saveUninitialized: true }));
 
-// 전역 뷰 파일 컨텍스트 세션 핸들러 설정
+// 전역 유저 세션 핸들러
 app.use((req, res, next) => {
     res.locals.user = req.session.user || null;
     next();
 });
 
-// 엔드포인트별 라우터 컨텍스트 매핑
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
-app.use('/user', userRouter);
-app.use('/board', boardRouter);
-app.use('/products', productRouter);
-app.use('/cart', cartRouter);
-app.use('/order', orderRouter);
-app.use('/mypage', mypageRouter);
-app.use('/wishlist', wishlistRouter);
-app.use('/admin', adminRouter);
+// ==========================================
+// ✨ [실습 서버 멀티유저 인프라 자동화 세팅]
+// ==========================================
 
-app.get('/login', (req, res) => { res.redirect('/user/login'); });
+// 1. 현재 리눅스 로그인 계정명(stud2, stud19 등)을 자동으로 인식합니다.
+const currentStudent = process.env.USER || '';
+const isServerEnvironment = currentStudent.startsWith('stud');
 
-// 예외 처리 및 HTTP 404 미들웨어 라우팅
+// 2. 서버 환경이면 '/stud2', 로컬 PC 환경이면 기존대로 ''(빈값)이 기본 주소가 됩니다.
+const basePath = isServerEnvironment ? `/${currentStudent}` : '';
+
+// 3. 계정 번호에 맞춰서 포트 자동 연산 (stud2 -> 3002, stud19 -> 3019)
+let defaultPort = '3000';
+if (isServerEnvironment) {
+    const match = currentStudent.match(/stud(\d+)/);
+    if (match) {
+        defaultPort = String(3000 + parseInt(match[1], 10));
+    }
+}
+const port = normalizePort(process.env.PORT || defaultPort);
+app.set('port', port);
+
+// 4. 모든 라우터에 자동으로 계정별 basePath(/stud2 등)를 동적으로 주입합니다.
+app.use(basePath + '/', indexRouter);
+app.use(basePath + '/users', usersRouter);
+app.use(basePath + '/user', userRouter);
+app.use(basePath + '/board', boardRouter);
+app.use(basePath + '/products', productRouter);
+app.use(basePath + '/cart', cartRouter);
+app.use(basePath + '/order', orderRouter);
+app.use(basePath + '/mypage', mypageRouter);
+app.use(basePath + '/wishlist', wishlistRouter);
+app.use(basePath + '/admin', adminRouter);
+
+app.get(basePath + '/login', (req, res) => { res.redirect(`${basePath}/user/login`); });
+
+// 404 및 에러 핸들러
 app.use(function(req, res, next) { next(createError(404)); });
 app.use(function(err, req, res, next) {
     res.locals.message = err.message;
@@ -134,15 +150,15 @@ app.use(function(err, req, res, next) {
     res.render('error');
 });
 
-/**
- * 2. 포트 설정 및 서버 구동 코드를 '맨 아래쪽'으로 몰아서 완벽히 연동합니다.
- */
-const port = normalizePort(process.env.PORT || '3000');
-app.set('port', port);
-
+// 5. 서버 진짜 구동하기 (listen 코드 내장)
 const server = http.createServer(app);
 server.listen(port, () => {
-    console.log(`서버가 정상적으로 ${port}번 포트에서 구동 중입니다!`);
+    console.log(`\n==================================================`);
+    console.log(`[*] 학과 실습 서버 멀티유저 라우팅 맵핑 완료!`);
+    console.log(`[*] 현재 실행 계정: ${currentStudent || '로컬 PC 개발 환경'}`);
+    console.log(`[*] 오픈된 포트: ${port}번`);
+    console.log(`[*] 접속 테스트 주소: http://10.125.234.122${basePath || ':3000'}`);
+    console.log(`==================================================\n`);
 });
 
 function normalizePort(val) {
