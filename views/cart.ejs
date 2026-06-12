@@ -169,24 +169,24 @@
     <% if (typeof user !== 'undefined' && user) { %>
         <span class="user-welcome">안녕하세요, <strong><%= user.username %></strong>님!</span>
         <% if (user.role === 'ADMIN') { %>
-            <a href="../admin/" class="top-link font-bold"><span class="badge-admin">ADMIN</span> 관리실</a>
+            <a href="admin/" class="top-link font-bold"><span class="badge-admin">ADMIN</span> 관리실</a>
         <% } %>
-        <a href="../mypage" class="top-link">마이페이지</a>
-        <a href="../user/logout" class="top-link" style="color: #f43f5e;">로그아웃</a>
+        <a href="mypage" class="top-link">마이페이지</a>
+        <a href="user/logout" class="top-link" style="color: #f43f5e;">로그아웃</a>
     <% } else { %>
         <span class="user-welcome">방문객님 환영합니다!</span>
-        <a href="../user/login" class="top-link">로그인</a>
-        <a href="../user/register" class="top-link">회원가입</a>
+        <a href="user/login" class="top-link">로그인</a>
+        <a href="user/register" class="top-link">회원가입</a>
     <% } %>
 </div>
 
 <header class="main-gnb-header">
-    <a href="../" class="brand-logo">🥤 Refresh <span>Beverage</span></a>
+    <a href="./" class="brand-logo">🥤 Refresh <span>Beverage</span></a>
     <nav class="nav-menu-group">
-        <a href="../">홈</a>
-        <a href="../products">상품목록</a>
-        <a href="./" class="active">장바구니</a>
-        <a href="../board">고객센터</a>
+        <a href="./">홈</a>
+        <a href="products">상품목록</a>
+        <a href="cart" class="active">장바구니</a>
+        <a href="board">고객센터</a>
     </nav>
 </header>
 
@@ -196,7 +196,7 @@
     <% if (!cartItems || cartItems.length === 0) { %>
         <div style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 80px; text-align: center;">
             <p style="color: #94a3b8; font-size: 18px; font-weight: 500; margin-bottom: 20px;">장바구니가 비어 있습니다.</p>
-            <a href="../products" class="btn-checkout" style="display:inline-block; text-decoration:none; font-size:14px; padding: 12px 30px;">상품 담으러 가기</a>
+            <a href="products" class="btn-checkout" style="display:inline-block; text-decoration:none; font-size:14px; padding: 12px 30px;">상품 담으러 가기</a>
         </div>
     <% } else { %>
         <div class="cart-list">
@@ -204,7 +204,7 @@
                 <div class="cart-item-card">
                     <div class="item-main-info">
                         <div class="item-icon">
-                            <img src="../images/<%= item.image || 'default.png' %>" alt="<%= item.name %>" style="width:100%; height:100%; object-fit:cover; border-radius:12px;">
+                            <img src="images/<%= item.image || 'default.png' %>" alt="<%= item.name %>" style="width:100%; height:100%; object-fit:cover; border-radius:12px;">
                         </div>
                         <div class="item-details">
                             <h4><%= item.name %></h4>
@@ -230,13 +230,13 @@
         </div>
 
         <div class="checkout-bar">
-            <form action="../order/confirm" method="POST" onsubmit="return confirm('결제를 진행하고 주문을 완료하시겠습니까?')">
+            <form action="order/confirm" method="POST" onsubmit="return confirm('결제를 진행하고 주문을 완료하시겠습니까?')">
                 <button type="submit" class="btn-checkout">주문 및 안전 결제하기</button>
             </form>
         </div>
     <% } %>
 
-    <a href="../products" class="back-link">← 음료 진열대로 돌아가기</a>
+    <a href="products" class="back-link">← 음료 진열대로 돌아가기</a>
 </div>
 
 <footer>

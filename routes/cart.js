@@ -14,6 +14,7 @@ router.post('/add', (req, res) => {
     if (!user) {
         return res.status(401).render('login_required', {
             message: '장바구니 담기 위해서는 로그인이 필요합니다.',
+            // 경로 보정: 3단계 주소창 스코프 고려하여 상대 경로 보정
             redirectUrl: '../user/login'
         });
     }
@@ -27,14 +28,15 @@ router.post('/add', (req, res) => {
             console.error('장바구니 추가 오류:', err.message);
             return res.status(500).send('장바구니 추가 실패');
         }
-        // 주소창 /cart/add (3단계)에서 /cart 이동
-        res.redirect('../');
+        // 경로 및 기능 수정: 알림창을 띄우고 장바구니 화면으로 안전하게 복귀하도록 보정 (현재 /cart/add 스코프이므로 주소는 ./ 가 됨)
+        res.send('<script>alert("장바구니에 상품이 정상적으로 담겼습니다."); location.href="./";</script>');
     });
 });
 
 // 주소창: .../stud19/cart
 router.get('/', (req, res) => {
     const user = req.session.user;
+    // 경로 보정: 2단계 주소창 스코프 고려하여 user/login 이동 시 앞에 절대경로 / 제거
     if (!user) return res.redirect('user/login');
 
     const query = `
@@ -72,11 +74,13 @@ router.post('/update', (req, res) => {
 
         if (newQuantity <= 0) {
             db.run(`DELETE FROM cart_items WHERE user_id = ? AND product_id = ?`, [userId, productId], (err) => {
-                return res.redirect('../');
+                // 경로 보정: 현재 /cart/update 이므로 한 단계 위인 /cart 화면 주소(./)로 복귀
+                return res.send('<script>alert("상품이 장바구니에서 삭제되었습니다."); location.href="./";</script>');
             });
         } else {
             db.run(`UPDATE cart_items SET quantity = ? WHERE user_id = ? AND product_id = ?`, [newQuantity, userId, productId], (err) => {
-                return res.redirect('../');
+                // 경로 보정: 수량 업데이트 후 다시 /cart 화면 주소(./)로 새로고침 복귀
+                return res.send('<script>alert("수량이 변경되었습니다."); location.href="./";</script>');
             });
         }
     });
@@ -94,7 +98,8 @@ router.post('/delete', (req, res) => {
         if (err) {
             return res.status(500).send('삭제 실패');
         }
-        res.redirect('../');
+        // 경로 보정: 삭제 완료 후 장바구니 본래 화면 주소(./)로 복귀
+        res.send('<script>alert("장바구니에서 삭제되었습니다."); location.href="./";</script>');
     });
 });
 
