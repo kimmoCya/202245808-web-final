@@ -30,6 +30,15 @@ router.get('/users', isAdmin, (req, res) => {
     });
 });
 
+// 🚩 [404 해결 핵심 신규] 회원 권한 변경 처리 POST 라우터 통합
+router.post('/users/update-role', isAdmin, (req, res) => {
+    const { userId, role } = req.body;
+    db.run('UPDATE users SET role = ? WHERE id = ?', [role, userId], (err) => {
+        if (err) return res.status(500).send('회원 권한 변경 실패');
+        res.send('<script>alert("회원 권한이 성공적으로 변경되었습니다."); location.href="../users";</script>');
+    });
+});
+
 // 주소창: .../stud19/admin/products
 router.get('/products', isAdmin, (req, res) => {
     db.all('SELECT * FROM products ORDER BY id DESC', (err, rows) => {
@@ -84,7 +93,7 @@ router.post('/products/delete/:id', isAdmin, (req, res) => {
 
 // 주소창: .../stud19/admin/orders
 router.get('/orders', isAdmin, (req, res) => {
-    // 🚩 [핵심 보정] 배송 완료된 주문 내역은 일괄 처리장 리스트에서 아예 안 보이게 SQL 조건절 추가
+    // 배송 완료된 건 제외하고 활성 주문만 연동
     const query = `
         SELECT o.id AS orderId, o.total_price AS totalPrice, o.status, o.created_at AS createdAt, u.name AS userName
         FROM orders o
@@ -103,20 +112,18 @@ router.post('/orders/update-status', isAdmin, (req, res) => {
     const { orderId, currentStatus } = req.body;
     let nextStatus = '';
 
-    // 🚩 [핵심 구현] 버튼 단 하나로 단계를 유기적으로 토글시키는 변환 로직
-    if (currentStatus === '결제완료') {
+    // 🚩 [명확한 단계 순환] 결제완료/배송준비중 단계에서 단계를 스무스하게 유기적 포워딩
+    if (currentStatus === '결제완료' || currentStatus === '배송준비중') {
         nextStatus = '배송중';
     } else if (currentStatus === '배송중') {
         nextStatus = '배송완료';
     } else {
-        // 이미 배송완료 상태인 내역은 예외 조치로 목록 복귀
         return res.send('<script>location.href="../orders";</script>');
     }
 
     db.run('UPDATE orders SET status = ? WHERE id = ?', [nextStatus, orderId], (err) => {
         if (err) return res.status(500).send('배송 상태 업데이트 실패');
 
-        // 데이터 수정 성공 후 알림 띄우고 주문 처리 대장으로 복귀 처리
         res.send(`
             <script>
                 alert('주문 상태가 [ ${nextStatus} ] 상태로 변경 처리 완료되었습니다.');

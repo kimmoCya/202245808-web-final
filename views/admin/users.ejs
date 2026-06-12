@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>관리자 센터 - 회원 관리</title>
-    <link rel="stylesheet" href="../public/stylesheets/style.css">
+    <link rel="stylesheet" href="../stylesheets/style.css">
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", "맑은 고딕", sans-serif;
@@ -47,7 +47,6 @@
             text-decoration: underline;
         }
 
-        /* 테이블 정밀 스타일링 */
         .member-table {
             width: 100%;
             border-collapse: collapse;
@@ -76,7 +75,6 @@
             color: #0f172a;
         }
 
-        /* 상태 배지 시스템 */
         .status-badge {
             display: inline-block;
             padding: 4px 8px;
@@ -94,7 +92,6 @@
             color: #991b1b;
         }
 
-        /* 셀렉트 박스 및 UI 버튼 */
         .select-role {
             padding: 6px 10px;
             border: 1px solid #cbd5e1;
@@ -204,7 +201,9 @@
                         <% } else { %>
                             <form action="users/kick" method="POST" onsubmit="return confirm('<%= member.name %> 회원을 강제 탈퇴 처리하시겠습니까?')" style="margin: 0;">
                                 <input type="hidden" name="userId" value="<%= member.id %>">
-                                <button type="submit" class="btn-delete">강제 탈퇴</button>
+                                <button type="submit" class="btn-delete" <%= member.is_withdrawn === 1 ? 'disabled style="background-color:#f1f5f9; color:#cbd5e1; border-color:#e2e8f0; cursor:not-allowed;"' : '' %>>
+                                    <%= member.is_withdrawn === 1 ? '탈퇴 완료' : '강제 탈퇴' %>
+                                </button>
                             </form>
                         <% } %>
                     </td>
