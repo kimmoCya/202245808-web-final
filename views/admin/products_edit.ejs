@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>음료 상품 정보 수정</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif; -webkit-font-smoothing: antialiased; padding: 40px; background-color: #f8fafc; }
@@ -20,7 +21,7 @@
 <div class="form-card">
     <h2>✏️ 음료 상품 정보 수정</h2>
 
-    <form action="../edit/<%= product.id %>" method="post">
+    <form action="" method="post">
         <label>음료 이름</label>
         <input type="text" name="name" value="<%= product.name %>" required>
         <label>가격 (원)</label>
@@ -36,7 +37,7 @@
             <option value="일반" <%= product.status === '일반' ? 'selected' : '' %>>일반 진열 상품</option>
             <option value="메인 추천 노출중" <%= product.status === '메인 추천 노출중' ? 'selected' : '' %>>🌟 메인 추천 노출중</option>
         </select>
-        <button type="submit" class="btn-submit">💚 수정 내용 반영하기</button>
+        <button type="submit" class="btn-submit">수정 내용 반영하기</button>
 
         <a href="../../products" class="btn-back">취소하고 대장으로 가기</a>
     </form>

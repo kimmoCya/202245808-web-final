@@ -132,7 +132,7 @@
     <header class="board-header">
         <h2>현재 몰 진열 상품 관리대장</h2>
         <div class="btn-group-right">
-            <a href="./" class="btn-home">대시보드로 복귀</a>
+            <a href="dashboard" class="btn-home">대시보드로 복귀</a>
             <a href="products/new" class="btn-add-product">신규 상품 추가</a>
         </div>
     </header>
@@ -151,60 +151,14 @@
             <tbody>
             <% if (typeof products !== 'undefined' && products && products.length > 0) { %>
                 <% products.forEach(product => { %>
-                    <tr id="row-<%= product.id %>">
-                        <td class="prod-id">#<%= product.id %></td>
-                        <td style="font-weight: 700; color: #0f172a;"><%= product.name %></td>
-                        <td style="font-weight: 600;">₩<%= product.price.toLocaleString() %></td>
-                        <td>
-                            <select class="status-select <%= product.status === '메인 추천 노출중' ? 'featured' : '' %>" onchange="updateStatus('<%= product.id %>', this)">
-                                <option value="일반" <%= product.status === '일반' ? 'selected' : '' %>>일반</option>
-                                <option value="메인 추천 노출중" <%= product.status === '메인 추천 노출중' ? 'selected' : '' %>>🌟 메인 추천 노출중</option>
-                            </select>
-                        </td>
-                        <td class="action-links">
-                            <a href="products/edit/<%= product.id %>" class="edit-btn">수정</a>
-                            <button type="button" class="delete-btn" onclick="deleteProduct('<%= product.id %>')">삭제</button>
-                        </td>
-                    </tr>
-                <% }) %>
-            <% } else { %>
-                <tr><td colspan="5" style="padding: 50px; color: #94a3b8; text-align: center; font-weight: 500;">진열된 음료 상품이 존재하지 않습니다.</td></tr>
-            <% } %>
-            </tbody>
-        </table>
-    </main>
-    <footer>&copy; 2026 시스템 관리 센터. All rights reserved.</footer>
-</div>
-
-<script>
-    function updateStatus(productId, selectElement) {
-        const newStatus = selectElement.value;
-        if(newStatus === '메인 추천 노출중') selectElement.classList.add('featured');
-        else selectElement.classList.remove('featured');
-
-        // /admin/products/update-status 에서 맨 앞 슬래시를 제거하여 배포 서버 포워딩 경로 유지
-        fetch('products/update-status', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: productId, status: newStatus })
-        })
-            .then(res => res.json())
-            .then(data => { if (!data.success) { alert('상태 변경 실패'); location.reload(); } })
-            .catch(err => console.error('Error:', err));
-    }
-
-    function deleteProduct(productId) {
-        if (confirm('이 음료 상품을 대장에서 즉시 삭제하시겠습니까?')) {
-            // /admin/products/delete 에서 맨 앞 슬래시를 제거하여 현재 디렉토리 컨텍스트에서 제어하게 변경
-            fetch('products/delete', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ productId: productId })
-            })
-                .then(res => res.json())
-                .then(data => { if (data.success) document.getElementById('row-' + productId).remove(); else alert('삭제 실패'); });
-        }
-    }
-</script>
-</body>
-</html>
+            <tr id="row-<%= product.id %>">
+                <td class="prod-id">#<%= product.id %></td>
+                <td style="font-weight: 700; color: #0f172a;"><%= product.name %></td>
+                <td style="font-weight: 600;">₩<%= product.price.toLocaleString() %></td>
+                <td>
+                    <select class="status-select <%= product.status === '메인 추천 노출중' ? 'featured' : '' %>" onchange="updateStatus('<%= product.id %>', this)">
+                        <option value="일반" <%= product.status === '일반' ? 'selected' : '' %>>일반</option>
+                        <option value="메인 추천 노출중" <%= product.status === '메인 추천 노출중' ? 'selected' : '' %>>🌟 메인 추천 노출중</option>
+                    </select>
+                </td>
+                <td class="action-links">

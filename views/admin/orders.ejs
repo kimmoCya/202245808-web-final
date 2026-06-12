@@ -31,11 +31,11 @@
 <div class="admin-container">
     <header class="board-header">
         <h2>🚚 고객 주문 및 배송 상태 일괄 처리장</h2>
-        <a href="./" class="btn-home">⬅ 대시보드로 복귀</a>
+        <a href="dashboard" class="btn-home">⬅ 대시보드로 복귀</a>
     </header>
 
     <main>
-        <form action="orders/update-batch" method="POST">
+        <form action="orders/update-status" method="POST">
             <table class="management-table">
                 <thead>
                 <tr>
@@ -51,17 +51,17 @@
                     <% orders.forEach(order => { %>
                         <tr>
                             <td class="prod-id">
-                                #<%= order.order_id %>
-                                <input type="hidden" name="orderIds" value="<%= order.order_id %>">
+                                #<%= order.orderId %>
+                                <input type="hidden" name="orderId" value="<%= order.orderId %>">
                             </td>
-                            <td style="font-weight: 700;"><%= order.user_name %> <span style="font-size:12px; color:#64748b;">(<%= order.username %>)</span></td>
-                            <td style="font-weight: 600; color: #0ea5e9;">₩<%= order.total_price.toLocaleString() %></td>
-                            <td style="font-size: 13px; color: #64748b;"><%= order.created_at.substring(0, 16) %></td>
+                            <td style="font-weight: 700;"><%= order.userName %> <span style="font-size:12px; color:#64748b;">(결제완료)</span></td>
+                            <td style="font-weight: 600; color: #0ea5e9;">₩<%= order.totalPrice.toLocaleString() %></td>
+                            <td style="font-size: 13px; color: #64748b;"><%= order.createdAt.substring(0, 16) %></td>
                             <td>
-                                <select class="status-select" name="newStatuses">
+                                <select class="status-select" name="status">
                                     <option value="배송준비중" <%= order.status === '배송준비중' ? 'selected' : '' %>>📦 배송준비중</option>
                                     <option value="배송중" <%= order.status === '배송중' ? 'selected' : '' %>>🚚 배송중</option>
-                                    <option value="배송완료" <%= order.status === '배송완료' ? 'selected' : '' %>>✅ 배송완료 (완료시 목록 제외)</option>
+                                    <option value="배송완료" <%= order.status === '배송완료' ? 'selected' : '' %>>✅ 배송완료</option>
                                 </select>
                             </td>
                         </tr>
@@ -73,7 +73,7 @@
             </table>
 
             <% if (orders && orders.length > 0) { %>
-                <button type="submit" class="btn-batch-save">현재 배송 상태 일괄 저장하기</button>
+                <button type="submit" class="btn-batch-save">현재 배송 상태 저장하기</button>
             <% } %>
         </form>
     </main>

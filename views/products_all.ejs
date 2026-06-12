@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>전체 상품 목록 - Refresh Beverage Mall</title>
-    <link rel="stylesheet" href="../../stylesheets/style.css">
+    <link rel="stylesheet" href="../stylesheets/style.css">
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", "맑은 고딕", helvetica, sans-serif;
@@ -252,10 +252,10 @@
 </div>
 
 <header class="main-gnb-header">
-    <a href="../../" class="brand-logo">Refresh <span>Beverage</span></a>
+    <a href="../" class="brand-logo">Refresh <span>Beverage</span></a>
     <nav class="nav-menu-group">
-        <a href="../../" class="nav-item">홈</a>
-        <a href="../" class="nav-item active">상품목록</a>
+        <a href="../" class="nav-item">홈</a>
+        <a href="./" class="nav-item active">상품목록</a>
         <a href="../cart" class="nav-item">장바구니</a>
         <a href="../board" class="nav-item">고객센터</a>
     </nav>
@@ -273,7 +273,7 @@
             <% products.forEach(product => { %>
                 <div class="shopping-card-box">
                     <div class="card-img-wrapper">
-                        <img src="../../images/<%= product.image || 'default.png' %>" alt="<%= product.name %>">
+                        <img src="../images/<%= product.image || 'default.png' %>" alt="<%= product.name %>">
                     </div>
                     <div class="card-info-content">
                         <h4><%= product.emoji || '🥤' %> <%= product.name %></h4>
@@ -297,7 +297,7 @@
         </div>
 
         <div class="back-to-list-zone">
-            <a href="../" class="link-back-main">← 상품 목록 홈으로 돌아가기</a>
+            <a href="./" class="link-back-main">← 상품 목록 홈으로 돌아가기</a>
         </div>
     </section>
 </div>

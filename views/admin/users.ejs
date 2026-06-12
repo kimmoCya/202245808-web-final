@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>관리자 센터 - 회원 관리</title>
-    <link rel="stylesheet" href="../stylesheets/style.css">
+    <link rel="stylesheet" href="../../stylesheets/style.css">
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", "맑은 고딕", sans-serif;
@@ -152,7 +152,7 @@
 <div class="admin-container">
     <div class="admin-header">
         <h2>쇼핑몰 가입 회원 명부</h2>
-        <a href="./" class="btn-back">대시보드로 복귀</a>
+        <a href="dashboard" class="btn-back">대시보드로 복귀</a>
     </div>
 
     <table class="member-table">
@@ -188,7 +188,7 @@
                                 <option>관리자 (ADMIN)</option>
                             </select>
                         <% } else { %>
-                            <form action="../admin/user/update-role" method="POST" style="display: flex; gap: 6px; margin: 0;">
+                            <form action="user/update-role" method="POST" style="display: flex; gap: 6px; margin: 0;">
                                 <input type="hidden" name="userId" value="<%= member.id %>">
                                 <select name="role" class="select-role">
                                     <option value="USER" <%= member.role === 'USER' ? 'selected' : '' %>>일반 회원</option>
@@ -202,7 +202,7 @@
                         <% if (member.role === 'ADMIN') { %>
                             <span class="text-master">마스터 계정</span>
                         <% } else { %>
-                            <form action="../admin/user/kick" method="POST" onsubmit="return confirm('<%= member.name %> 회원을 강제 탈퇴 처리하시겠습니까?')" style="margin: 0;">
+                            <form action="user/kick" method="POST" onsubmit="return confirm('<%= member.name %> 회원을 강제 탈퇴 처리하시겠습니까?')" style="margin: 0;">
                                 <input type="hidden" name="userId" value="<%= member.id %>">
                                 <button type="submit" class="btn-delete">강제 탈퇴</button>
                             </form>
