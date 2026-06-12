@@ -12,10 +12,11 @@ router.post('/add', (req, res) => {
     const productId = req.body.productId;
 
     if (!user) {
+        // 🚩 [정밀 보정] 비로그인 시 형의 정석 로그인 주소인 .../stud19/login 으로 튕겨줌
         return res.status(401).send(`
             <script>
                 alert('장바구니 담기 위해서는 로그인이 필요합니다.');
-                location.href = '../user/login';
+                location.href = '../login';
             </script>
         `);
     }
@@ -30,7 +31,7 @@ router.post('/add', (req, res) => {
             return res.status(500).send('장바구니 추가 실패');
         }
 
-        // 🚩 [핵심 복구] 흰 화면 없이 바로 선택창 띄우고 브라우저 제어
+        // [복구] 형이 원하는 O, X 선택 알림창 제어
         res.send(`
             <script>
                 if (confirm('장바구니에 상품이 정상적으로 담겼습니다.\\n장바구니로 이동하시겠습니까?')) {
@@ -46,7 +47,11 @@ router.post('/add', (req, res) => {
 // 주소창: .../cart
 router.get('/', (req, res) => {
     const user = req.session.user;
-    if (!user) return res.redirect('../user/login');
+
+    // 🚩 [핵심 보정] 주소창에 .../cart 쳤을 때 로그인 안 되어 있으면 .../stud19/login 으로 다이렉트 이동
+    if (!user) {
+        return res.redirect('../login');
+    }
 
     const query = `
     SELECT p.id, p.name, p.price, p.emoji, p.image, c.quantity
@@ -62,7 +67,7 @@ router.get('/', (req, res) => {
 
 // 주소창: .../cart/update
 router.post('/update', (req, res) => {
-    if (!req.session.user) return res.redirect('../login_required');
+    if (!req.session.user) return res.redirect('../login');
     const userId = req.session.user.id;
     const productId = req.body.productId;
     const action = req.body.action;
@@ -90,7 +95,7 @@ router.post('/update', (req, res) => {
 router.post('/delete', (req, res) => {
     const user = req.session.user;
     const { productId } = req.body;
-    if (!user) return res.redirect('../user/login');
+    if (!user) return res.redirect('../login');
 
     const query = `DELETE FROM cart_items WHERE user_id = ? AND product_id = ?`;
     db.run(query, [user.id, productId], (err) => {

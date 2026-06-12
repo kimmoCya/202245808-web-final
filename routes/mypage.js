@@ -10,8 +10,9 @@ const db = new sqlite3.Database(dbPath);
 router.get('/', (req, res) => {
     const sessionUser = req.session.user;
 
+    // 🚩 [보정] 비로그인 시 형의 정석 로그인 주소인 .../stud19/login 으로 이동
     if (!sessionUser) {
-        return res.redirect('user/login');
+        return res.redirect('login');
     }
 
     db.get('SELECT * FROM users WHERE username = ? AND is_withdrawn = 0', [sessionUser.username], (err, user) => {
@@ -37,8 +38,8 @@ router.post('/withdraw', (req, res) => {
 
         req.session.destroy((sessionErr) => {
             if (sessionErr) console.error('세션 파기 오류:', sessionErr);
-            // 주소창 /mypage/withdraw (3단계)에서 최상위 홈으로 이동
-            res.redirect('../../');
+            // 🚩 [보정] 주소창 /mypage/withdraw 계층 구조 탈출 후 메인 화면으로 리다이렉트
+            res.redirect('../products');
         });
     });
 });
