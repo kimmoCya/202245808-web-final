@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>내 위시리스트</title>
+    <link rel="stylesheet" href="stylesheets/style.css">
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
@@ -27,13 +28,11 @@
         .btn-cart { background-color: #0f172a; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.2s; }
         .btn-cart:hover { background-color: #1e293b; }
 
-        /* 비어있을 때 스타일 스택 */
         .empty-wish-box { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 60px 40px; text-align: center; margin-bottom: 50px; }
         .empty-wish-box p { color: #64748b; font-size: 16px; font-weight: 500; margin-top: 0; margin-bottom: 20px; }
         .btn-go-shopping { display: inline-block; background-color: #0ea5e9; color: white; border: none; padding: 12px 35px; border-radius: 8px; font-size: 14px; font-weight: 700; text-decoration: none; box-shadow: 0 4px 14px rgba(14, 165, 233, 0.2); transition: 0.2s; }
         .btn-go-shopping:hover { background-color: #0284c7; transform: translateY(-1px); }
 
-        /* 하단 인기 추천 상품 그리드 레이아웃 */
         .recommend-section { margin-top: 50px; }
         .recommend-title { font-size: 18px; font-weight: 800; color: #0f172a; margin-bottom: 20px; border-bottom: 2px solid #0f172a; padding-bottom: 10px; }
         .shopping-item-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
@@ -50,23 +49,23 @@
 <div class="wish-container">
     <h2>❤️ 내 위시리스트 목록</h2>
     <div class="nav-links">
-        <a href="../products">상품 보러가기</a> | <a href="../mypage">마이페이지</a>
+        <a href="products">商品 보러가기</a> | <a href="mypage">마이페이지</a>
     </div>
     <hr style="border: 0; height: 1px; background: #e2e8f0; margin-bottom: 25px;">
 
     <% if (wishlistItems.length === 0) { %>
         <div class="empty-wish-box">
             <p>위시리스트가 비어 있습니다. 마음에 드는 음료를 찜해보세요!</p>
-            <a href="../products" class="btn-go-shopping">음료 구경하러 가기</a>
+            <a href="products" class="btn-go-shopping">음료 구경하러 가기</a>
         </div>
 
         <div class="recommend-section">
             <div class="recommend-title">🥤 이런 음료는 어떠세요?</div>
             <div class="shopping-item-grid">
                 <% featuredProducts.forEach(product => { %>
-                    <div class="shopping-card-box" onclick="location.href='../products'" style="cursor:pointer;">
+                    <div class="shopping-card-box" onclick="location.href='products'" style="cursor:pointer;">
                         <div class="card-img-wrapper">
-                            <img src="../images/<%= product.image || 'default.png' %>" alt="<%= product.name %>">
+                            <img src="images/<%= product.image || 'default.png' %>" alt="<%= product.name %>">
                         </div>
                         <div class="card-info-content">
                             <h4><%= product.name %></h4>
@@ -84,7 +83,7 @@
                 <div class="wish-item">
                     <span class="wish-item-info"><strong><%= item.name %></strong> - ₩<%= item.price.toLocaleString() %></span>
                     <div style="display: flex; gap: 6px;">
-                        <form action="../cart/add" method="POST" style="margin:0;">
+                        <form action="cart/add" method="POST" style="margin:0;">
                             <input type="hidden" name="productId" value="<%= item.id %>">
                             <button type="submit" class="btn-cart">담기</button>
                         </form>

@@ -25,7 +25,9 @@ router.post('/add', (req, res) => {
 // 주소창: .../stud19/wishlist
 router.get('/', (req, res) => {
     const user = req.session.user;
-    if (!user) return res.redirect('user/login');
+
+    // 🚩 [보정] 비로그인 시 형의 정석 로그인 주소인 .../stud19/login 으로 튕겨줌
+    if (!user) return res.redirect('login');
 
     const wishlistQuery = `
         SELECT w.id AS wish_id, p.id, p.name, p.price, p.emoji, p.image 
@@ -54,11 +56,12 @@ router.post('/delete', (req, res) => {
     const user = req.session.user;
     const { productId } = req.body;
 
-    if (!user) return res.redirect('../user/login');
+    if (!user) return res.redirect('login');
 
     db.run(`DELETE FROM wishlist WHERE user_id = ? AND product_id = ?`, [user.id, productId], (err) => {
         if (err) return res.status(500).send('위시리스트 삭제 실패');
-        res.redirect('../');
+        // 🚩 [보정] 알림창 일절 없이 묵묵하게 위시리스트 메인 화면으로 제자리 새로고침 처리
+        res.redirect('wishlist');
     });
 });
 
