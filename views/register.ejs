@@ -34,6 +34,9 @@
             font-weight: 500;
             color: #94a3b8;
         }
+        .user-welcome strong {
+            color: #38bdf8;
+        }
         .top-link {
             color: #cbd5e1;
             text-decoration: none;
@@ -41,6 +44,14 @@
         }
         .top-link:hover {
             color: #ffffff;
+        }
+        .badge-admin {
+            background-color: #ef4444;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
         }
 
         /* 2단: 쇼핑몰 고정 상단 GNB 바 */
@@ -212,9 +223,18 @@
 <body>
 
 <div class="top-utility-bar">
-    <span class="user-welcome">방문객님 환영합니다!</span>
-    <a href="login" class="top-link">로그인</a>
-    <a href="register" class="top-link font-bold" style="color: #0ea5e9;">회원가입</a>
+    <% if (typeof user !== 'undefined' && user) { %>
+        <span class="user-welcome">안녕하세요, <strong><%= user.username %></strong>님!</span>
+        <% if (user.role === 'ADMIN') { %>
+            <a href="../admin" class="top-link font-bold"><span class="badge-admin">ADMIN</span> 관리실</a>
+        <% } %>
+        <a href="../mypage" class="top-link">마이페이지</a>
+        <a href="../user/logout" class="top-link" style="color: #f43f5e;">로그아웃</a>
+    <% } else { %>
+        <span class="user-welcome">방문객님 환영합니다!</span>
+        <a href="../user/login" class="top-link">로그인</a>
+        <a href="../user/register" class="top-link font-bold" style="color: #0ea5e9;">회원가입</a>
+    <% } %>
 </div>
 
 <header class="main-gnb-header">
@@ -223,4 +243,64 @@
         <a href="../" class="nav-item">홈</a>
         <a href="../products" class="nav-item">상품목록</a>
         <a href="../cart" class="nav-item">장바구니</a>
-        <a href="../board" class="nav-
+        <a href="../board" class="nav-item">고객센터</a>
+    </nav>
+</header>
+
+<div class="register-contents-body">
+
+    <div class="register-card-box">
+        <h2>회원가입</h2>
+        <p class="register-sub-text">회원정보를 입력해 주시면 청량한 혜택이 시작됩니다.</p>
+
+        <form action="" method="post">
+
+            <div class="form-group">
+                <label for="username" class="required">아이디</label>
+                <input type="text" id="username" name="username" placeholder="사용할 아이디를 입력하세요" required>
+            </div>
+
+            <div class="form-group">
+                <label for="name" class="required">이름</label>
+                <input type="text" id="name" name="name" placeholder="이름을 입력해주세요" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="required">비밀번호</label>
+                <input type="password" id="password" name="password" placeholder="비밀번호를 입력해주세요" required>
+            </div>
+
+            <div class="form-group">
+                <label for="birth">생년월일</label>
+                <input type="text" id="birth" name="birth" placeholder="예: 19990327">
+            </div>
+
+            <div class="form-group">
+                <label for="email" class="required">이메일</label>
+                <input type="email" id="email" name="email" placeholder="예: hong2026@naver.com" required>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">연락처</label>
+                <input type="tel" id="phone" name="phone" placeholder="휴대폰 '-' 없이 숫자만 입력하세요">
+            </div>
+
+            <div class="form-group">
+                <label for="address">주소</label>
+                <input type="text" id="address" name="address" placeholder="주소를 입력해주세요">
+            </div>
+
+            <button type="submit" class="btn-register-submit">가입하기</button>
+        </form>
+
+        <a href="../" class="link-back-home">🏠 메인으로 돌아가기</a>
+    </div>
+
+</div>
+
+<footer class="mall-footer-layer">
+    <p>&copy; 2026 Refresh Beverage Mall. All rights reserved.</p>
+</footer>
+
+</body>
+</html>
