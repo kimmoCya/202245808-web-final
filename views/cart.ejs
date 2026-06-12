@@ -87,8 +87,7 @@
     <% if (typeof user !== 'undefined' && user) { %>
         <span class="user-welcome">안녕하세요, <strong><%= user.username %></strong>님!</span>
         <% if (user.role === 'ADMIN') { %>
-            <a href="../admin/" class="top-link font-bold"><span class="badge-admin">ADMIN</span> 관리실</a>
-        <% } %>
+            <a href="admin/" class="top-link font-bold"><span class="badge-admin">ADMIN</span> 관리실</a>
         <a href="mypage" class="top-link">마이페이지</a>
         <a href="user/logout" class="top-link" style="color: #f43f5e;">로그아웃</a>
     <% } else { %>
