@@ -12,13 +12,28 @@ router.post('/add', (req, res) => {
     const { productId } = req.body;
 
     if (!user) {
-        return res.status(401).send('로그인이 필요합니다.');
+        return res.status(401).send(`
+            <script>
+                alert('위시리스트에 담기 위해서는 로그인이 필요합니다.');
+                location.href = '../login';
+            </script>
+        `);
     }
 
     const query = `INSERT OR IGNORE INTO wishlist (user_id, product_id) VALUES (?, ?)`;
     db.run(query, [user.id, productId], (err) => {
-        if (err) return res.status(500).send('위시리스트 추가 실패');
-        res.status(200).send('위시리스트 추가 완료');
+        if (err) {
+            console.error('위시리스트 추가 오류:', err.message);
+            return res.status(500).send('위시리스트 추가 실패');
+        }
+
+        // 🚩 [형이 원한 로직] 이동 없이 알림창만 띄우고 보던 상품목록 페이지로 복귀
+        res.send(`
+            <script>
+                alert('위시리스트에 상품이 정상적으로 담겼습니다.');
+                location.href = '../products';
+            </script>
+        `);
     });
 });
 
@@ -26,7 +41,7 @@ router.post('/add', (req, res) => {
 router.get('/', (req, res) => {
     const user = req.session.user;
 
-    // 🚩 [보정] 비로그인 시 형의 정석 로그인 주소인 .../stud19/login 으로 튕겨줌
+    // 비로그인 시 형의 정석 로그인 주소인 .../stud19/login 으로 리다이렉트
     if (!user) return res.redirect('login');
 
     const wishlistQuery = `
@@ -60,8 +75,9 @@ router.post('/delete', (req, res) => {
 
     db.run(`DELETE FROM wishlist WHERE user_id = ? AND product_id = ?`, [user.id, productId], (err) => {
         if (err) return res.status(500).send('위시리스트 삭제 실패');
-        // 🚩 [보정] 알림창 일절 없이 묵묵하게 위시리스트 메인 화면으로 제자리 새로고침 처리
-        res.redirect('wishlist');
+
+        // 404 중복 증식 버그 완벽 수정본 유지
+        res.redirect('../wishlist');
     });
 });
 
