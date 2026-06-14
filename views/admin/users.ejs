@@ -131,7 +131,6 @@
             border-color: #fca5a5;
         }
 
-        /* 🚩 죽은 데이터 영구 제거용 크림슨 레드 커스텀 스타일 버튼 추가 */
         .btn-hard-destroy {
             background-color: #ef4444;
             color: white !important;
@@ -173,11 +172,10 @@
     <table class="member-table">
         <thead>
         <tr>
-            <th style="width: 10%;">회원번호</th>
-            <th style="width: 15%;">아이디</th>
-            <th style="width: 15%;">이름</th>
-            <th style="width: 18%;">연락처</th>
-            <th style="width: 12%;">상태</th>
+            <th style="width: 15%;">회원번호</th>
+            <th style="width: 20%;">아이디</th>
+            <th style="width: 20%;">이름</th>
+            <th style="width: 15%;">상태</th>
             <th style="width: 18%;">권한 변경</th>
             <th style="width: 12%;">강제 관리</th>
         </tr>
@@ -189,7 +187,7 @@
                     <td>#<%= member.id %></td>
                     <td class="username-text"><%= member.username %></td>
                     <td><%= member.name %></td>
-                    <td><%= member.phone || '-' %></td>
+
                     <td>
                         <% if (member.is_withdrawn === 1) { %>
                             <span class="status-badge withdrawn">탈퇴</span>
@@ -197,6 +195,7 @@
                             <span class="status-badge active">정상</span>
                         <% } %>
                     </td>
+
                     <td>
                         <% if (member.role === 'ADMIN') { %>
                             <select class="select-role" disabled>
@@ -213,12 +212,13 @@
                             </form>
                         <% } %>
                     </td>
+
                     <td>
                         <% if (member.role === 'ADMIN') { %>
                             <span class="text-master">마스터 계정</span>
                         <% } else { %>
                             <% if (member.is_withdrawn === 1) { %>
-                                <form action="users/remove-permanent" method="POST" onsubmit="return confirm('⚠️ [시체 완전 박멸] <%= member.name %> 회원의 가입 데이터 및 시체 데이터를 DB에서 아예 파기하시겠습니까? 관련 장바구니 로그 등 연동 관계가 영구 소멸됩니다.')" style="margin: 0;">
+                                <form action="users/remove-permanent" method="POST" onsubmit="return confirm('<%= member.name %> 회원의 가입 데이터 및 시체 데이터를 DB에서 아예 파기하시겠습니까? 관련 장바구니 로그 등 연동 관계가 영구 소멸됩니다.')" style="margin: 0;">
                                     <input type="hidden" name="userId" value="<%= member.id %>">
                                     <button type="submit" class="btn-hard-destroy">💥 영구 삭제</button>
                                 </form>
@@ -234,7 +234,7 @@
             <% }) %>
         <% } else { %>
             <tr>
-                <td colspan="7" style="text-align: center; padding: 40px 0; color: #94a3b8; font-weight: 500;">가입된 회원이 존재하지 않습니다.</td>
+                <td colspan="6" style="text-align: center; padding: 40px 0; color: #94a3b8; font-weight: 500;">가입된 회원이 존재하지 않습니다. 🧊</td>
             </tr>
         <% } %>
         </tbody>
