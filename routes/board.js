@@ -20,15 +20,12 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // ==================================================
-// 🔒 [신설] 로그인 여부를 검사하는 미들웨어 가드
+// 🔒 로그인 여부를 검사하는 미들웨어 가드
 // ==================================================
 function requireLogin(req, res, next) {
     if (req.session && req.session.user) {
-        // 로그인 세션이 존재하면 다음 라우터 행선지로 통과
         next();
     } else {
-        // 로그인 안 되어 있으면 자바스크립트 경고창 띄우고 로그인 페이지로 강제 압송
-        // 주소창 계층에 맞춰 슬래시 없는 'user/login'으로 상대 경로 지정
         return res.send(`
             <script>
                 alert("고객센터 게시판은 로그인 후 이용 가능합니다.");
@@ -41,7 +38,6 @@ function requireLogin(req, res, next) {
 // ==================================================
 // 1. 고객센터 게시판 메인 리스트 (주소창: .../stud19/board)
 // ==================================================
-// 🚩 requireLogin 미들웨어를 장착하여 로그인 안 한 사용자는 진입 컷!
 router.get('/', requireLogin, (req, res) => {
     const query = `
         SELECT p.*, 
@@ -55,7 +51,6 @@ router.get('/', requireLogin, (req, res) => {
 
     db.all(query, [], (err, posts) => {
         if (err) return res.send('목록 불러오기 실패');
-        // 이쁜 내비바 연동을 위해 세션 user 객체 함께 인계
         res.render('board', { title: '고객센터 게시판', posts, user: req.session.user });
     });
 });
@@ -87,13 +82,10 @@ router.post('/new', requireLogin, upload.single('attachment'), (req, res) => {
                     [postId, filename, filepath],
                     (err2) => {
                         if (err2) console.error('파일 저장 오류:', err2.message);
-
-                        // 🚩 [주소 교정] 작성 완료 후 끝에 슬래시가 없는 깔끔한 /board 로 복귀
                         res.redirect('../board');
                     }
                 );
             } else {
-                // 🚩 [주소 교정] 작성 완료 후 끝에 슬래시가 없는 깔끔한 /board 로 복귀
                 res.redirect('../board');
             }
         }
@@ -145,55 +137,74 @@ router.post('/reply/:id', requireLogin, upload.single('attachment'), (req, res) 
         [title, content, parentId, author],
         function (err) {
             if (err) return res.send('답글 등록 실패');
-
-            // 🚩 [주소 교정] 답글 저장 후 슬래시 없는 /board 목록으로 안전 복귀
             res.redirect('../../board');
         }
     );
 });
 
 // ==================================================
-// 5. 문의글 수정 구역 (주소창: .../stud19/board/edit/:id)
+// 5. 문의글 수정 화면 진입 (주소창: .../stud19/board/edit/:id)
 // ==================================================
 router.get('/edit/:id', requireLogin, (req, res) => {
     db.get('SELECT * FROM posts WHERE id = ?', [req.params.id], (err, post) => {
         if (err || !post) return res.send('글 없음');
+
+        // 🚩 [보안 가드] 글 작성자와 현재 로그인한 유저의 세션명이 다르면 진입 원천 차단!
+        if (post.author !== req.session.user.username) {
+            return res.send('<script>alert("본인이 작성한 글만 수정할 수 있습니다."); history.back();</script>');
+        }
+
         res.render('post', { post, parentId: null, user: req.session.user });
     });
 });
 
+// 5-1. 문의글 수정 처리 데이터베이스 반영
 router.post('/edit/:id', requireLogin, upload.single('attachment'), (req, res) => {
     const { title, content } = req.body;
-    db.run(
-        'UPDATE posts SET title = ?, content = ? WHERE id = ?',
-        [title, content, req.params.id],
-        (err) => {
-            if (err) return res.send('수정 실패');
 
-            // 수정 완료 후 해당 글 상세보기 화면으로 백업
-            res.redirect('../view/' + req.params.id);
+    // 🚩 [보안 가드] POST 요청 처리 시에도 재차 본인인지 쿼리 조회 검증 후 업데이트 진행
+    db.get('SELECT author FROM posts WHERE id = ?', [req.params.id], (err, post) => {
+        if (err || !post) return res.send('글 없음');
+
+        if (post.author !== req.session.user.username) {
+            return res.send('<script>alert("수정 권한이 없습니다."); history.back();</script>');
         }
-    );
+
+        db.run(
+            'UPDATE posts SET title = ?, content = ? WHERE id = ?',
+            [title, content, req.params.id],
+            (err2) => {
+                if (err2) return res.send('수정 실패');
+                res.redirect('../../board');
+            }
+        );
+    });
 });
 
 // ==================================================
-// 6. 문의글 삭제 (주소창: .../stud19/board/delete/:id)
+// 6. 문의글 삭제 처리 (주소창: .../stud19/board/delete/:id)
 // ==================================================
 router.get('/delete/:id', requireLogin, (req, res) => {
     const postId = req.params.id;
     const currentUser = req.session.user;
 
-    // 최고 관리자 계정 권한 예외 방어 가드
-    if (!currentUser || currentUser.role !== 'ADMIN') {
-        return res.send('<script>alert("게시글 삭제는 최고 관리자만 가능합니다."); history.back();</script>');
-    }
+    db.get('SELECT author FROM posts WHERE id = ?', [postId], (err, post) => {
+        if (err || !post) return res.send('존재하지 않는 게시글입니다.');
 
-    db.run('DELETE FROM posts WHERE id = ?', [postId], (err) => {
-        if (err) return res.send('삭제 실패');
+        // 🚩 [보안 가드 핵심 분기]
+        // 1. 현재 접속 유저가 최고 관리자(ADMIN)이거나
+        // 2. 글 작성자가 현재 로그인한 본인 계정일 때만 삭제 허용!
+        const isExistAdmin = currentUser && currentUser.role === 'ADMIN';
+        const isAuthorMe = post.author === currentUser.username;
 
-        // 🚩 [형의 의도 완벽 반영] 삭제 후 다른 페이지나 홈으로 안 튕기고,
-        // 주소창 맨 끝에 슬래시가 붙지 않는 순수 /board 목록 화면 그대로 안착시킴!
-        res.redirect('../../board');
+        if (!isExistAdmin && !isAuthorMe) {
+            return res.send('<script>alert("삭제 권한이 없습니다. 본인 글 또는 관리자만 삭제 가능합니다."); history.back();</script>');
+        }
+
+        db.run('DELETE FROM posts WHERE id = ?', [postId], (err2) => {
+            if (err2) return res.send('삭제 실패');
+            res.redirect('../../board');
+        });
     });
 });
 

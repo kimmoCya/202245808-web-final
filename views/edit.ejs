@@ -51,6 +51,7 @@
             margin-bottom: 20px;
             transition: all 0.2s;
             background-color: #fff;
+            color: #0f172a;
         }
 
         input[type="text"]:focus, textarea:focus {
@@ -86,7 +87,8 @@
             color: #64748b;
             text-decoration: none;
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 600;
+            transition: color 0.2s;
         }
         .btn-back:hover {
             color: #1e293b;
@@ -115,7 +117,7 @@
         <textarea id="content" name="content" placeholder="수정할 내용을 입력하세요" rows="12" required><%= post.content %></textarea>
 
         <div class="form-actions">
-            <a href="../view/<%= post.id %>" class="btn-back">← 원글로 돌아가기</a>
+            <a href="../../board" class="btn-back">← 게시판 목록으로 돌아가기</a>
             <button type="submit" class="btn-submit">💚 수정 완료</button>
         </div>
     </form>

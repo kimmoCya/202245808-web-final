@@ -5,113 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= post ? '글 수정' : (parentId ? '답글 작성' : '새 글 작성') %></title>
     <style>
-        body {
-            font-family: 'Noto Sans KR', sans-serif;
-            margin: 0;
-            padding: 40px;
-            background-color: #f8fafc;
-            color: #334155;
-        }
-
-        .form-container {
-            max-width: 700px;
-            margin: 0 auto;
-            background: white;
-            padding: 35px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-        }
-
-        h2 {
-            font-size: 24px;
-            font-weight: 700;
-            color: #1e293b;
-            margin-top: 0;
-            margin-bottom: 25px;
-            border-left: 5px solid #2563eb;
-            padding-left: 12px;
-        }
-
-        label {
-            font-size: 14px;
-            font-weight: 600;
-            color: #475569;
-            display: block;
-            margin-bottom: 8px;
-        }
-
-        input[type="text"], textarea {
-            width: 100%;
-            padding: 12px;
-            font-size: 14px;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            box-sizing: border-box;
-            margin-bottom: 20px;
-            transition: all 0.2s;
-            background-color: #fff;
-            color: #0f172a;
-        }
-        input[type="text"]:focus, textarea:focus {
-            outline: none;
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-
-        .file-upload-box {
-            background-color: #f8fafc;
-            border: 1px dashed #cbd5e1;
-            padding: 15px;
-            border-radius: 6px;
-            margin-bottom: 25px;
-        }
-        input[type="file"] {
-            font-size: 13px;
-            color: #64748b;
-        }
-
-        .form-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 10px;
-        }
-
-        .btn-submit {
-            background-color: #2563eb;
-            color: white;
-            border: none;
-            padding: 10px 24px;
-            font-size: 14px;
-            font-weight: bold;
-            border-radius: 6px;
-            cursor: pointer;
-            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.15);
-            transition: background 0.2s;
-        }
-        .btn-submit:hover {
-            background-color: #1d4ed8;
-        }
-
-        /* 🚩 디자인 클래스 선택자 정상 작동 확인 */
-        .btn-back {
-            color: #64748b;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 600;
-            transition: color 0.2s;
-        }
-        .btn-back:hover {
-            color: #1e293b;
-            text-decoration: underline;
-        }
-
-        footer {
-            margin-top: 40px;
-            text-align: center;
-            font-size: 12px;
-            color: #94a3b8;
-        }
+        body { font-family: 'Noto Sans KR', sans-serif; margin: 0; padding: 40px; background-color: #f8fafc; color: #334155; }
+        .form-container { max-width: 700px; margin: 0 auto; background: white; padding: 35px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); }
+        h2 { font-size: 24px; font-weight: 700; color: #1e293b; margin-top: 0; margin-bottom: 25px; border-left: 5px solid #2563eb; padding-left: 12px; }
+        label { font-size: 14px; font-weight: 600; color: #475569; display: block; margin-bottom: 8px; }
+        input[type="text"], textarea { width: 100%; padding: 12px; font-size: 14px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; margin-bottom: 20px; transition: all 0.2s; background-color: #fff; color: #0f172a; }
+        input[type="text"]:focus, textarea:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        .file-upload-box { background-color: #f8fafc; border: 1px dashed #cbd5e1; padding: 15px; border-radius: 6px; margin-bottom: 25px; }
+        input[type="file"] { font-size: 13px; color: #64748b; }
+        .form-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+        .btn-submit { background-color: #2563eb; color: white; border: none; padding: 10px 24px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.15); transition: background 0.2s; }
+        .btn-submit:hover { background-color: #1d4ed8; }
+        .btn-back { color: #64748b; text-decoration: none; font-size: 14px; font-weight: 600; transition: color 0.2s; }
+        .btn-back:hover { color: #1e293b; text-decoration: underline; }
+        footer { margin-top: 40px; text-align: center; font-size: 12px; color: #94a3b8; }
     </style>
 </head>
 <body>
@@ -119,7 +26,7 @@
 <div class="form-container">
     <h2>📝 <%= post ? '글 수정' : (parentId ? '답글 작성' : '새 글 작성') %></h2>
 
-    <form action="<%= post ? '' : (parentId ? '../reply/' + parentId : '') %>" method="post" enctype="multipart/form-data">
+    <form action="" method="post" enctype="multipart/form-data">
         <input type="hidden" name="parent_id" value="<%= post ? post.parent_id : parentId %>">
 
         <label for="title">📝 제목</label>
@@ -134,7 +41,7 @@
         </div>
 
         <div class="form-actions">
-            <a href="../" class="btn-back">← 게시판으로 돌아가기</a>
+            <a href="../../board" class="btn-back">← 게시판으로 돌아가기</a>
             <button type="submit" class="btn-submit">💾 저장하기</button>
         </div>
     </form>
