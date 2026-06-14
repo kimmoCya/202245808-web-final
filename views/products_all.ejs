@@ -6,27 +6,24 @@
     <title>전체 상품 목록 - Refresh Beverage Mall</title>
 
     <script>
-        // 주소창 경로를 슬래시 기준으로 쪼개서 배열로 담기
+        // 현재 브라우저 주소창 경로 분리
         const pathSegments = window.location.pathname.split('/').filter(Boolean);
         let contextPath = '/';
 
-        // 💥 [서버/로컬 통합 상대경로 가드]
-        // products/all 페이지는 주소창 깊이가 한 단계 더 내려와 있으므로
-        // 하위 메뉴 이동 시 경로가 꼬이지 않도록 가상 base 디렉토리를 동적으로 계산함
+        // 💥 [서버/로컬 경로 완전 동기화 가드]
+        // HTML 내부에 슬래시(/)나 점(..)이 없는 순수 상대 경로를 유지하기 위해,
+        // 브라우저의 base 기준점을 정확히 'products' 라우터 바로 직전 단계까지만 세팅함!
         if (pathSegments.length > 0) {
             if (pathSegments[0] === 'products') {
-                // 1. 로컬 환경 (localhost:3000/products/all) 대응
-                contextPath = '/products/';
-            } else if (pathSegments[1] === 'products') {
-                // 2. 학교 실습 서버 환경 (10.125.234.122/stud4/products/all) 대응
-                contextPath = '/' + pathSegments[0] + '/products/';
+                // 1. 로컬 환경 (localhost:3000/products/all) ➔ 기준점을 '/'로 설정
+                contextPath = '/';
             } else {
-                // 3. 그 외 일반 예외 주소 대응
+                // 2. 서버 환경 (10.125.234.122/stud4/products/all) ➔ 기준점을 '/stud4/'로 설정
                 contextPath = '/' + pathSegments[0] + '/';
             }
         }
 
-        // 동적으로 계산 완료된 정석 절대 기준점을 base href 태그로 실시간 주입
+        // 연산된 최종 기준점 주소를 base 태그에 주입
         const baseTag = document.createElement('base');
         baseTag.href = window.location.origin + contextPath;
         document.head.appendChild(baseTag);
