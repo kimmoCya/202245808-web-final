@@ -6,17 +6,20 @@ const path = require('path');
 const dbPath = path.resolve(__dirname, '../db/database.sqlite');
 const db = new sqlite3.Database(dbPath);
 
-// 주소창: .../cart/add
+// ==================================================
+// 1. 상품 상세나 목록에서 [장바구니 추가] 버튼 타격 구역 (주소창: .../cart/add)
+// ==================================================
 router.post('/add', (req, res) => {
     const user = req.session.user;
     const productId = req.body.productId;
 
     if (!user) {
-        // 🚩 [정밀 보정] 비로그인 시 형의 정석 로그인 주소인 .../stud19/login 으로 튕겨줌
-        return res.status(401).send(`
+        // 🚩 [완벽 보정] 주소창이 /cart/add (3단계) 상태이므로
+        // ../../ 로 완전히 학번 루트 디렉토리 계층까지 탈출한 뒤, 순수 단어 'user/login' 을 찔러야 정확히 도달함!
+        return res.send(`
             <script>
-                alert('장바구니 담기 위해서는 로그인이 필요합니다.');
-                location.href = '../login';
+                alert('장바구니를 담기 위해서는 로그인이 필요합니다.');
+                location.href = '../../user/login';
             </script>
         `);
     }
@@ -31,7 +34,7 @@ router.post('/add', (req, res) => {
             return res.status(500).send('장바구니 추가 실패');
         }
 
-        // [복구] 형이 원하는 O, X 선택 알림창 제어
+        // 형이 원하던 O, X 팝업 선택 모달 제어판 주소창 정규화 완료
         res.send(`
             <script>
                 if (confirm('장바구니에 상품이 정상적으로 담겼습니다.\\n장바구니로 이동하시겠습니까?')) {
@@ -44,13 +47,16 @@ router.post('/add', (req, res) => {
     });
 });
 
-// 주소창: .../cart
+// ==================================================
+// 2. 장바구니 메인 목록 화면 진입 (주소창: .../cart)
+// ==================================================
 router.get('/', (req, res) => {
     const user = req.session.user;
 
-    // 🚩 [핵심 보정] 주소창에 .../cart 쳤을 때 로그인 안 되어 있으면 .../stud19/login 으로 다이렉트 이동
+    // 🚩 [핵심 교정 가드] 주소창에 슬래시 없는 순수 /cart (2단계) 상태로 진입했을 때 비로그인이면
+    // 한 단계 위인 학번 루트로 후퇴한 뒤(../), user/login 으로 꽂아야 주소창이 깨지지 않습니다!
     if (!user) {
-        return res.redirect('../login');
+        return res.redirect('../user/login');
     }
 
     const query = `
@@ -65,9 +71,13 @@ router.get('/', (req, res) => {
     });
 });
 
-// 주소창: .../cart/update
+// ==================================================
+// 3. 장바구니 수량 증감 제어 구역 (주소창: .../cart/update)
+// ==================================================
 router.post('/update', (req, res) => {
-    if (!req.session.user) return res.redirect('../login');
+    // 세션 튕김 방어 주소 매핑 보정
+    if (!req.session.user) return res.redirect('../../user/login');
+
     const userId = req.session.user.id;
     const productId = req.body.productId;
     const action = req.body.action;
@@ -91,11 +101,15 @@ router.post('/update', (req, res) => {
     });
 });
 
-// 주소창: .../cart/delete
+// ==================================================
+// 4. 장바구니 특정 품목 완전 제거 (주소창: .../cart/delete)
+// ==================================================
 router.post('/delete', (req, res) => {
     const user = req.session.user;
     const { productId } = req.body;
-    if (!user) return res.redirect('../login');
+
+    // 세션 튕김 방어 주소 매핑 보정
+    if (!user) return res.redirect('../../user/login');
 
     const query = `DELETE FROM cart_items WHERE user_id = ? AND product_id = ?`;
     db.run(query, [user.id, productId], (err) => {
