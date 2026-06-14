@@ -130,6 +130,24 @@
             background-color: #fee2e2;
             border-color: #fca5a5;
         }
+
+        /* 🚩 죽은 데이터 영구 제거용 크림슨 레드 커스텀 스타일 버튼 추가 */
+        .btn-hard-destroy {
+            background-color: #ef4444;
+            color: white !important;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.15);
+        }
+        .btn-hard-destroy:hover {
+            background-color: #b91c1c;
+        }
+
         .text-master {
             font-size: 13px;
             color: #94a3b8;
@@ -199,12 +217,17 @@
                         <% if (member.role === 'ADMIN') { %>
                             <span class="text-master">마스터 계정</span>
                         <% } else { %>
-                            <form action="users/kick" method="POST" onsubmit="return confirm('<%= member.name %> 회원을 강제 탈퇴 처리하시겠습니까?')" style="margin: 0;">
-                                <input type="hidden" name="userId" value="<%= member.id %>">
-                                <button type="submit" class="btn-delete" <%= member.is_withdrawn === 1 ? 'disabled style="background-color:#f1f5f9; color:#cbd5e1; border-color:#e2e8f0; cursor:not-allowed;"' : '' %>>
-                                    <%= member.is_withdrawn === 1 ? '탈퇴 완료' : '강제 탈퇴' %>
-                                </button>
-                            </form>
+                            <% if (member.is_withdrawn === 1) { %>
+                                <form action="users/remove-permanent" method="POST" onsubmit="return confirm('⚠️ [시체 완전 박멸] <%= member.name %> 회원의 가입 데이터 및 시체 데이터를 DB에서 아예 파기하시겠습니까? 관련 장바구니 로그 등 연동 관계가 영구 소멸됩니다.')" style="margin: 0;">
+                                    <input type="hidden" name="userId" value="<%= member.id %>">
+                                    <button type="submit" class="btn-hard-destroy">💥 영구 삭제</button>
+                                </form>
+                            <% } else { %>
+                                <form action="users/kick" method="POST" onsubmit="return confirm('<%= member.name %> 회원을 강제 탈퇴 처리하시겠습니까?')" style="margin: 0;">
+                                    <input type="hidden" name="userId" value="<%= member.id %>">
+                                    <button type="submit" class="btn-delete">강제 탈퇴</button>
+                                </form>
+                            <% } %>
                         <% } %>
                     </td>
                 </tr>

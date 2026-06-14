@@ -30,12 +30,42 @@ router.get('/users', isAdmin, (req, res) => {
     });
 });
 
-// 🚩 [404 해결 핵심 신규] 회원 권한 변경 처리 POST 라우터 통합
+// 회원 권한 변경 처리 POST 라우터
 router.post('/users/update-role', isAdmin, (req, res) => {
     const { userId, role } = req.body;
     db.run('UPDATE users SET role = ? WHERE id = ?', [role, userId], (err) => {
         if (err) return res.status(500).send('회원 권한 변경 실패');
         res.send('<script>alert("회원 권한이 성공적으로 변경되었습니다."); location.href="../users";</script>');
+    });
+});
+
+// 🚩 [신설 - 시체 파기 구역] 탈퇴 완료된 회원 레코드 영구 삭제 (Hard Delete)
+router.post('/users/remove-permanent', isAdmin, (req, res) => {
+    const { userId } = req.body;
+
+    // 데이터베이스 users 테이블에서 해당 유저 데이터 완벽하게 행 삭제
+    db.run('DELETE FROM users WHERE id = ?', [userId], function (err) {
+        if (err) {
+            console.error('시체 파기 실패:', err.message);
+            return res.status(500).send('회원 데이터 영구 삭제 실패');
+        }
+
+        // 🚩 [주소 교정] 치우기 완료 후 끝에 슬래시가 붙지 않는 깔끔한 /admin/users 상태로 내비게이션 점프
+        res.send(`
+            <script>
+                alert("해당 계정의 모든 개인정보 및 시체 데이터가 DB에서 영구 삭제되었습니다.");
+                location.href = "../users";
+            </script>
+        `);
+    });
+});
+
+// 기존의 소프트 강제 탈퇴 라우터 (시체 보관 상태로 전환)
+router.post('/users/kick', isAdmin, (req, res) => {
+    const { userId } = req.body;
+    db.run('UPDATE users SET is_withdrawn = 1 WHERE id = ?', [userId], (err) => {
+        if (err) return res.status(500).send('강제 탈퇴 처리 실패');
+        res.send('<script>alert("해당 회원을 강제 탈퇴 처리(시체 보관) 하였습니다."); location.href="../users";</script>');
     });
 });
 
@@ -93,7 +123,6 @@ router.post('/products/delete/:id', isAdmin, (req, res) => {
 
 // 주소창: .../stud19/admin/orders
 router.get('/orders', isAdmin, (req, res) => {
-    // 배송 완료된 건 제외하고 활성 주문만 연동
     const query = `
         SELECT o.id AS orderId, o.total_price AS totalPrice, o.status, o.created_at AS createdAt, u.name AS userName
         FROM orders o
@@ -112,7 +141,6 @@ router.post('/orders/update-status', isAdmin, (req, res) => {
     const { orderId, currentStatus } = req.body;
     let nextStatus = '';
 
-    // 🚩 [명확한 단계 순환] 결제완료/배송준비중 단계에서 단계를 스무스하게 유기적 포워딩
     if (currentStatus === '결제완료' || currentStatus === '배송준비중') {
         nextStatus = '배송중';
     } else if (currentStatus === '배송중') {

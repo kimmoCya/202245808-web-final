@@ -67,8 +67,9 @@ router.post('/new', requireLogin, upload.single('attachment'), (req, res) => {
     const author = req.session.user?.username || '익명';
     const noticeValue = is_notice ? 1 : 0;
 
+    // 🚩 [실시간 보정] created_at 컬럼에 SQLite 내부 로컬 현재 시간 함수인 DATETIME('now', 'localtime') 직격 배치!
     db.run(
-        'INSERT INTO posts (title, content, parent_id, author, is_notice) VALUES (?, ?, ?, ?, ?)',
+        'INSERT INTO posts (title, content, parent_id, author, is_notice, created_at) VALUES (?, ?, ?, ?, ?, DATETIME(\'now\', \'localtime\'))',
         [title, content, parent_id || null, author, noticeValue],
         function (err) {
             if (err) return res.send('작성 실패');
@@ -106,7 +107,7 @@ router.get('/view/:id', requireLogin, (req, res) => {
 
             db.all('SELECT * FROM posts WHERE parent_id = ? ORDER BY id ASC', [postId], (cerr, comments) => {
                 if (cerr) console.error('댓글 조회 실패:', cerr.message);
-                res.render('detail', { post, files: files || [], comments: comments || [], user: req.session.user });
+                res.render('detail', { post, files: files || [], comments: comments || [] , user: req.session.user });
             });
         });
     });
@@ -132,8 +133,9 @@ router.post('/reply/:id', requireLogin, upload.single('attachment'), (req, res) 
     const { title, content } = req.body;
     const author = req.session.user?.username || '익명';
 
+    // 🚩 [실시간 보정] 답글 생성 시에도 똑같이 한국 표준시 타임스탬프 강제 인젝션 완료
     db.run(
-        'INSERT INTO posts (title, content, parent_id, author, is_notice) VALUES (?, ?, ?, ?, 0)',
+        'INSERT INTO posts (title, content, parent_id, author, is_notice, created_at) VALUES (?, ?, ?, ?, 0, DATETIME(\'now\', \'localtime\'))',
         [title, content, parentId, author],
         function (err) {
             if (err) return res.send('답글 등록 실패');
@@ -143,13 +145,12 @@ router.post('/reply/:id', requireLogin, upload.single('attachment'), (req, res) 
 });
 
 // ==================================================
-// 5. 문의글 수정 화면 진입 (주소창: .../stud19/board/edit/:id)
+// 5. 문의글 수정 구역 (주소창: .../stud19/board/edit/:id)
 // ==================================================
 router.get('/edit/:id', requireLogin, (req, res) => {
     db.get('SELECT * FROM posts WHERE id = ?', [req.params.id], (err, post) => {
         if (err || !post) return res.send('글 없음');
 
-        // 🚩 [보안 가드] 글 작성자와 현재 로그인한 유저의 세션명이 다르면 진입 원천 차단!
         if (post.author !== req.session.user.username) {
             return res.send('<script>alert("본인이 작성한 글만 수정할 수 있습니다."); history.back();</script>');
         }
@@ -158,11 +159,9 @@ router.get('/edit/:id', requireLogin, (req, res) => {
     });
 });
 
-// 5-1. 문의글 수정 처리 데이터베이스 반영
 router.post('/edit/:id', requireLogin, upload.single('attachment'), (req, res) => {
     const { title, content } = req.body;
 
-    // 🚩 [보안 가드] POST 요청 처리 시에도 재차 본인인지 쿼리 조회 검증 후 업데이트 진행
     db.get('SELECT author FROM posts WHERE id = ?', [req.params.id], (err, post) => {
         if (err || !post) return res.send('글 없음');
 
@@ -182,7 +181,7 @@ router.post('/edit/:id', requireLogin, upload.single('attachment'), (req, res) =
 });
 
 // ==================================================
-// 6. 문의글 삭제 처리 (주소창: .../stud19/board/delete/:id)
+// 6. 문의글 삭제 (주소창: .../stud19/board/delete/:id)
 // ==================================================
 router.get('/delete/:id', requireLogin, (req, res) => {
     const postId = req.params.id;
@@ -191,9 +190,6 @@ router.get('/delete/:id', requireLogin, (req, res) => {
     db.get('SELECT author FROM posts WHERE id = ?', [postId], (err, post) => {
         if (err || !post) return res.send('존재하지 않는 게시글입니다.');
 
-        // 🚩 [보안 가드 핵심 분기]
-        // 1. 현재 접속 유저가 최고 관리자(ADMIN)이거나
-        // 2. 글 작성자가 현재 로그인한 본인 계정일 때만 삭제 허용!
         const isExistAdmin = currentUser && currentUser.role === 'ADMIN';
         const isAuthorMe = post.author === currentUser.username;
 
