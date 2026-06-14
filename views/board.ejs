@@ -35,12 +35,12 @@
             border-bottom: 2px solid #f1f5f9;
         }
 
-        h2 {
-            font-size: 24px;
-            font-weight: bold;
-            color: #0f172a;
-            margin: 0;
-        }
+        <h2> {
+             font-size: 24px;
+             font-weight: bold;
+             color: #0f172a;
+             margin: 0;
+         }
 
         .header-nav {
             display: flex;
@@ -143,11 +143,14 @@
         .action-links a {
             color: #cbd5e1;
             text-decoration: none;
-            margin: 0 2px;
+            margin: 0 4px;
         }
         .action-links a:hover {
-            color: #ef4444;
+            color: #3b82f6;
             text-decoration: underline;
+        }
+        .action-links a.delete-link:hover {
+            color: #ef4444;
         }
 
         footer {
@@ -166,7 +169,7 @@
     <header class="board-header">
         <h2>고객센터 게시판</h2>
         <nav class="header-nav">
-            <a href="index" class="btn-back">홈으로</a>
+            <a href="/index" class="btn-back">홈으로</a>
             <a href="board/new" class="btn-write-box">문의글 쓰기</a>
         </nav>
     </header>
@@ -203,7 +206,7 @@
 
                             <span class="action-links">
                                 (<a href="board/edit/<%= post.id %>">수정</a> /
-                                 <a href="board/delete/<%= post.id %>">삭제</a>)
+                                 <a href="board/delete/<%= post.id %>" class="delete-link" onclick="return confirm('이 문의글을 정말로 삭제하시겠습니까?')">삭제</a>)
                             </span>
                         </td>
 
