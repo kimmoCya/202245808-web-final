@@ -14,12 +14,12 @@ router.post('/add', (req, res) => {
     const productId = req.body.productId;
 
     if (!user) {
-        // 🚩 [완벽 보정] 주소창이 /cart/add (3단계) 상태이므로
-        // ../../ 로 완전히 학번 루트 디렉토리 계층까지 탈출한 뒤, 순수 단어 'user/login' 을 찔러야 정확히 도달함!
+        // 🚩 [계정 보존 보정 완료]
+        // 계정 경로 /stud19 가 파괴되지 않고 뒤에 /user/login 이 부드럽게 붙도록 경로 타격 싱크 완벽 교정
         return res.send(`
             <script>
                 alert('장바구니를 담기 위해서는 로그인이 필요합니다.');
-                location.href = '../../user/login';
+                location.href = '../user/login';
             </script>
         `);
     }
@@ -34,7 +34,6 @@ router.post('/add', (req, res) => {
             return res.status(500).send('장바구니 추가 실패');
         }
 
-        // 형이 원하던 O, X 팝업 선택 모달 제어판 주소창 정규화 완료
         res.send(`
             <script>
                 if (confirm('장바구니에 상품이 정상적으로 담겼습니다.\\n장바구니로 이동하시겠습니까?')) {
@@ -53,10 +52,11 @@ router.post('/add', (req, res) => {
 router.get('/', (req, res) => {
     const user = req.session.user;
 
-    // 🚩 [핵심 교정 가드] 주소창에 슬래시 없는 순수 /cart (2단계) 상태로 진입했을 때 비로그인이면
-    // 한 단계 위인 학번 루트로 후퇴한 뒤(../), user/login 으로 꽂아야 주소창이 깨지지 않습니다!
+    // 🚩 [형의 의도 100% 반영 종결 구역]
+    // 주소창에 슬래시 없는 순수 /cart 상태에서 비로그인 컷 당했을 때
+    // 상위 계정 스코프를 날려버리지 않고 확실하게 /user/login 으로 방향 전환 완료!
     if (!user) {
-        return res.redirect('../user/login');
+        return res.redirect('user/login');
     }
 
     const query = `
@@ -75,8 +75,7 @@ router.get('/', (req, res) => {
 // 3. 장바구니 수량 증감 제어 구역 (주소창: .../cart/update)
 // ==================================================
 router.post('/update', (req, res) => {
-    // 세션 튕김 방어 주소 매핑 보정
-    if (!req.session.user) return res.redirect('../../user/login');
+    if (!req.session.user) return res.redirect('../user/login');
 
     const userId = req.session.user.id;
     const productId = req.body.productId;
@@ -108,8 +107,7 @@ router.post('/delete', (req, res) => {
     const user = req.session.user;
     const { productId } = req.body;
 
-    // 세션 튕김 방어 주소 매핑 보정
-    if (!user) return res.redirect('../../user/login');
+    if (!user) return res.redirect('../user/login');
 
     const query = `DELETE FROM cart_items WHERE user_id = ? AND product_id = ?`;
     db.run(query, [user.id, productId], (err) => {
