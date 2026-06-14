@@ -6,8 +6,27 @@
     <title>전체 상품 목록 - Refresh Beverage Mall</title>
 
     <script>
-        const pathSegments = window.location.pathname.split('/');
-        const contextPath = pathSegments[1] ? '/' + pathSegments[1] + '/' : '/';
+        // 주소창 경로를 슬래시 기준으로 쪼개서 배열로 담기
+        const pathSegments = window.location.pathname.split('/').filter(Boolean);
+        let contextPath = '/';
+
+        // 💥 [서버/로컬 통합 상대경로 가드]
+        // products/all 페이지는 주소창 깊이가 한 단계 더 내려와 있으므로
+        // 하위 메뉴 이동 시 경로가 꼬이지 않도록 가상 base 디렉토리를 동적으로 계산함
+        if (pathSegments.length > 0) {
+            if (pathSegments[0] === 'products') {
+                // 1. 로컬 환경 (localhost:3000/products/all) 대응
+                contextPath = '/products/';
+            } else if (pathSegments[1] === 'products') {
+                // 2. 학교 실습 서버 환경 (10.125.234.122/stud4/products/all) 대응
+                contextPath = '/' + pathSegments[0] + '/products/';
+            } else {
+                // 3. 그 외 일반 예외 주소 대응
+                contextPath = '/' + pathSegments[0] + '/';
+            }
+        }
+
+        // 동적으로 계산 완료된 정석 절대 기준점을 base href 태그로 실시간 주입
         const baseTag = document.createElement('base');
         baseTag.href = window.location.origin + contextPath;
         document.head.appendChild(baseTag);
@@ -285,7 +304,7 @@
                         <img src="images/<%= product.image || 'default.png' %>" alt="<%= product.name %>">
                     </div>
                     <div class="card-info-content">
-                        <h4><%= product.emoji || '🥤' %> <%= product.name %></h4>
+                        <h4><%= product.name %></h4>
                         <div class="card-price-line">
                             ₩<%= product.price.toLocaleString() %>
                         </div>

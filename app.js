@@ -19,18 +19,19 @@ const mypageRouter = require('./routes/mypage');
 const wishlistRouter = require('./routes/wishlist');
 const adminRouter = require('./routes/admin');
 
-// app 객체 선언
+// express 객체 생성
 const app = express();
 
-// SQLite 데이터베이스 연결 설정
+// SQLite 데이터베이스 파일 연결하기
 const dbPath = path.join(__dirname, 'db/database.sqlite');
 const db = new sqlite3.Database(dbPath, (err) => {
     if (err) console.error('DB 연결 오류:', err.message);
     else console.log('SQLite 데이터베이스 연결 성공');
 });
 
+// 서버 켤 때 필요한 테이블들 자동으로 만들어주는 구역
 db.serialize(() => {
-    // 회원 테이블 초기화
+    // 1. 회원 정보 테이블
     db.run(`
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -44,32 +45,33 @@ db.serialize(() => {
         )
     `);
 
+    // 기존 테이블에 컬럼 없을 때를 대비해서 ALTER TABLE로 예외 처리해둠
     db.run(`ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'USER'`, (err) => {});
     db.run(`ALTER TABLE users ADD COLUMN is_withdrawn INTEGER DEFAULT 0`, (err) => {});
 
-    // 위시리스트 테이블 초기화
+    // 2. 위시리스트(찜) 테이블
     db.run(`CREATE TABLE IF NOT EXISTS wishlist (
         id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, product_id INTEGER, created_at DATETIME DEFAULT CURRENT_TIMESTAMP, UNIQUE(user_id, product_id)
     )`);
 
-    // 주문 테이블 초기화
+    // 3. 주문 테이블
     db.run(`CREATE TABLE IF NOT EXISTS orders (
         id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, total_price INTEGER, created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`);
     db.run(`ALTER TABLE orders ADD COLUMN status TEXT DEFAULT '배송준비중'`, (err) => {});
 
-    // 주문 상세 항목 테이블 초기화
+    // 4. 주문 상세 품목 테이블
     db.run(`CREATE TABLE IF NOT EXISTS order_items (
         id INTEGER PRIMARY KEY AUTOINCREMENT, order_id INTEGER, product_id INTEGER, quantity INTEGER, price INTEGER
     )`);
 
-    // 상품 테이블 초기화
+    // 5. 상품 테이블
     db.run(`CREATE TABLE IF NOT EXISTS products (
         id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, price INTEGER, emoji TEXT, description TEXT, image TEXT, is_featured INTEGER DEFAULT 0, likes INTEGER DEFAULT 0
     )`);
     db.run(`ALTER TABLE products ADD COLUMN status TEXT DEFAULT '일반'`, (err) => {});
 
-    // 파일 테이블 초기화
+    // 6. 고객센터 게시판 첨부파일 테이블
     db.run(`
     CREATE TABLE IF NOT EXISTS files (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -79,7 +81,7 @@ db.serialize(() => {
     )
     `);
 
-    // 최고 관리자 마스터 계정 초기 시딩
+    // 처음 서버 실행할 때 관리자 계정(admin/1234) 없으면 자동으로 하나 넣어두기
     db.get("SELECT * FROM users WHERE username = 'admin'", async (err, row) => {
         if (!row) {
             const hashedAdminPassword = await bcrypt.hash('1234', 10);
@@ -88,35 +90,40 @@ db.serialize(() => {
     });
 });
 
+// 뷰 엔진을 EJS로 설정하고 views 폴더 지정
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
+// express 기본 미들웨어들 세팅
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+// 정적 파일(CSS, 이미지 등)을 불러오기 위한 public 폴더 기본 설정
 app.use(express.static(path.join(__dirname, 'public')));
 
+// 로컬 localhost 환경에서도 uploads 폴더 안의 상품 사진들이 안 깨지고 잘 나오도록 추가한 구역
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+
+// 세션 사용 설정 (비밀키 고정)
 app.use(session({ secret: 'secret-key', resave: false, saveUninitialized: true }));
 
-// 전역 유저 세션 핸들러
+// 모든 EJS 템플릿 화면에서 로그인한 유저 정보(user)를 바로 다이렉트로 쓸 수 있게 해주는 전역 변수 설정
 app.use((req, res, next) => {
     res.locals.user = req.session.user || null;
     next();
 });
 
 // ==========================================
-// ✨ [실습 서버 멀티유저 인프라 자동화 세팅]
+// 학교 실습 서버 멀티유저 및 포트 자동 할당 구역
 // ==========================================
-
-// 🚩 [교수님 필수 지정 규격 완벽 반영]
-// 교수님이 공지사항 5번의 3항에서 명시한 포트 할당 코드를 소스코드에 글자 그대로 전면 배치합니다. (검수 감점 원천 차단)
+// 교수님이 공지방에 올려주신 조건에 맞춰서 포트 설정하는 부분
 const PORT = process.env.PORT || 3000;
-
 const currentStudent = process.env.USER || '';
 const isServerEnvironment = currentStudent.startsWith('stud');
 
-// 포트 자동 연산 백업 (배포 환경 변수가 누락되었을 때만 stud19 -> 3019 기본값 자동 바인딩)
+// 학번 계정명(stud19 등) 뒤의 숫자를 파싱해서 3000번에 더해주는 자동 포트 계산 로직
 let defaultPort = '3000';
 if (isServerEnvironment) {
     const match = currentStudent.match(/stud(\d+)/);
@@ -125,24 +132,20 @@ if (isServerEnvironment) {
     }
 }
 
-// 주입된 PORT 변수가 있으면 해당 값을 최우선 적용하고, 없으면 백업 계산된 defaultPort를 유연하게 연결
 const port = normalizePort(process.env.PORT ? PORT : defaultPort);
 app.set('port', port);
 
-// ⭕ [404 해결의 핵심 가드 미들웨어]
-// Nginx 프록시가 주소창 맨 앞에 붙여서 던지는 /stud19 등의 경로 계정 토큰을
-// Express 라우터가 가상 디렉토리 경로명으로 오해하여 404를 터뜨리지 않도록 req.url 구조를 정규화합니다.
+// 학교 서버 가상 디렉토리(/stud19 등) 주소 때문에 라우터 먹통되고 404 터지는 거 막아주는 주소 정규화 부분
 app.use((req, res, next) => {
     const parts = req.url.split('/').filter(Boolean);
-    // 첫 세그먼트 주소가 프로젝트 내부에 정의된 정식 라우터 키워드가 아니라면 베이스 경로(stud19 등)로 간주하고 과감히 자릅니다.
+    // 주소창 첫 번째 단어가 내가 만든 기능 라우터 이름이 아니면 학번 폴더 이름으로 생각하고 주소창에서 잘라냄
     if (parts.length > 0 && !['user', 'board', 'products', 'cart', 'order', 'mypage', 'wishlist', 'admin', 'users', 'login'].includes(parts[0])) {
-        // 원래 요청 주소에서 계정명 세그먼트를 제거하여 상대 경로 매핑 무결성 확보
         req.url = '/' + parts.slice(1).join('/');
     }
     next();
 });
 
-// ⭕ 모든 환경(로컬 PC, 우분투 서버 계정 구분 없이)에서 완벽히 연동되도록 멀티 라우팅 패스를 정의합니다.
+// 각각의 기능별 서브 라우터 파일들 매핑
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/user', userRouter);
@@ -154,10 +157,13 @@ app.use('/mypage', mypageRouter);
 app.use('/wishlist', wishlistRouter);
 app.use('/admin', adminRouter);
 
+// 주소창에 그냥 /login 쳤을 때도 user 폴더 안의 로그인 주소로 부드럽게 넘겨주기
 app.get('/login', (req, res) => { res.redirect('user/login'); });
 
-// 404 및 에러 핸들러
+// 주소를 잘못 입력했을 때 404 에러를 에러 핸들러로 던져주는 구역
 app.use(function(req, res, next) { next(createError(404)); });
+
+// 최종 에러 처리 화면 렌더링 핸들러
 app.use(function(err, req, res, next) {
     res.locals.message = err.message;
     res.locals.error = req.app.get('env') === 'development' ? err : {};
@@ -165,7 +171,7 @@ app.use(function(err, req, res, next) {
     res.render('error');
 });
 
-// 서버 진짜 구동하기 (listen 코드 내장)
+// HTTP 서버 인스턴스 생성하고 구동하기 (listen 호출)
 const server = http.createServer(app);
 server.listen(port, () => {
     console.log(`\n==================================================`);
@@ -176,6 +182,7 @@ server.listen(port, () => {
     console.log(`==================================================\n`);
 });
 
+// 숫자가 아닌 포트 값이 들어왔을 때 변환 및 예외 처리해주는 헬퍼 함수
 function normalizePort(val) {
     var port = parseInt(val, 10);
     if (isNaN(port)) return val;
