@@ -6,13 +6,12 @@ const path = require('path');
 const dbPath = path.resolve(__dirname, '../db/database.sqlite');
 const db = new sqlite3.Database(dbPath);
 
-// 로그인 세션 확인해서 관리자(ADMIN)인지 검사하는 미들웨어
+// 관리자 권한 체크 미들웨어
 function isAdmin(req, res, next) {
     const user = req.session.user;
     if (user && user.role === 'ADMIN') {
         next();
     } else {
-        // 실제 사이트처럼 안내 문구 수정
         res.send('<script>alert("관리자 권한이 없습니다. 관리자 계정으로 로그인해주세요."); location.href="../user/login";</script>');
     }
 }
@@ -25,7 +24,7 @@ router.get('/', isAdmin, (req, res) => {
     res.render('admin/dashboard');
 });
 
-// 회원 목록 조회 화면 (.../stud19/admin/users)
+// 회원 목록 조회
 router.get('/users', isAdmin, (req, res) => {
     db.all('SELECT id, username, name, role, is_withdrawn FROM users ORDER BY id DESC', (err, rows) => {
         if (err) return res.status(500).send('회원 명부 조회 실패');
@@ -33,7 +32,7 @@ router.get('/users', isAdmin, (req, res) => {
     });
 });
 
-// 회원 권한 변경 (일반회원 <-> 관리자 등)
+// 회원 권한 변경
 router.post('/users/update-role', isAdmin, (req, res) => {
     const { userId, role } = req.body;
     db.run('UPDATE users SET role = ? WHERE id = ?', [role, userId], (err) => {
@@ -42,28 +41,19 @@ router.post('/users/update-role', isAdmin, (req, res) => {
     });
 });
 
-// 탈퇴 완료된 회원 데이터베이스에서 완전히 삭제하기
+// 탈퇴 회원 영구 삭제
 router.post('/users/remove-permanent', isAdmin, (req, res) => {
     const { userId } = req.body;
-
-    // users 테이블에서 해당 id 데이터를 행 삭제
     db.run('DELETE FROM users WHERE id = ?', [userId], function (err) {
         if (err) {
             console.error('회원 영구 삭제 실패:', err.message);
             return res.status(500).send('회원 데이터 삭제 실패');
         }
-
-        // 쇼핑몰 표준 텍스트로 보정 및 가상 디렉토리 주소창 유지
-        res.send(`
-            <script>
-                alert("선택하신 회원 계정 및 개인정보가 완전히 삭제되었습니다.");
-                location.href = "../users";
-            </script>
-        `);
+        res.send(`<script>alert("선택하신 회원 계정 및 개인정보가 완전히 삭제되었습니다."); location.href = "../users";</script>`);
     });
 });
 
-// 강제 탈퇴 처리하기 (우선은 withdrawn 플래그만 1로 업데이트해서 보관)
+// 강제 탈퇴 처리
 router.post('/users/kick', isAdmin, (req, res) => {
     const { userId } = req.body;
     db.run('UPDATE users SET is_withdrawn = 1 WHERE id = ?', [userId], (err) => {
@@ -72,7 +62,7 @@ router.post('/users/kick', isAdmin, (req, res) => {
     });
 });
 
-// 등록된 상품 목록 대장 조회 (.../stud19/admin/products)
+// 등록 상품 목록 조회
 router.get('/products', isAdmin, (req, res) => {
     db.all('SELECT * FROM products ORDER BY id DESC', (err, rows) => {
         if (err) return res.status(500).send('상품 목록 조회 실패');
@@ -80,12 +70,12 @@ router.get('/products', isAdmin, (req, res) => {
     });
 });
 
-// 신규 상품 등록 서식 페이지 진입
+// 신규 상품 등록 서식 페이지
 router.get('/products/new', isAdmin, (req, res) => {
     res.render('admin/products_new');
 });
 
-// 신규 상품 등록 DB Insert 처리
+// 신규 상품 등록 처리
 router.post('/products/new', isAdmin, (req, res) => {
     const { name, price, emoji, description, image, status } = req.body;
     const query = `INSERT INTO products (name, price, emoji, description, image, status) VALUES (?, ?, ?, ?, ?, ?)`;
@@ -96,7 +86,7 @@ router.post('/products/new', isAdmin, (req, res) => {
     });
 });
 
-// 상품 정보 수정 화면 가져오기
+// 상품 정보 수정 페이지 호출
 router.get('/products/edit/:id', isAdmin, (req, res) => {
     const productId = req.params.id;
     db.get('SELECT * FROM products WHERE id = ?', [productId], (err, row) => {
@@ -105,15 +95,36 @@ router.get('/products/edit/:id', isAdmin, (req, res) => {
     });
 });
 
-// 상품 정보 수정 완료 처리 Update
+// 상품 정보 수정 및 비동기 상태 변경 통합 처리
 router.post('/products/edit/:id', isAdmin, (req, res) => {
     const productId = req.params.id;
     const { name, price, emoji, description, image, status } = req.body;
-    const query = `UPDATE products SET name=?, price=?, emoji=?, description=?, image=?, status=? WHERE id=?`;
 
-    db.run(query, [name, price, emoji, description, image, status, productId], (err) => {
-        if (err) return res.status(500).send('상품 정보 수정 실패');
-        res.send('<script>alert("상품 정보가 수정되었습니다."); location.href="../../products";</script>');
+    // 비동기 요청 시 누락되는 데이터 오염을 막기 위해 기존 데이터 선조회
+    db.get('SELECT * FROM products WHERE id = ?', [productId], (searchErr, currentProduct) => {
+        if (searchErr || !currentProduct) return res.status(404).send('상품 정보를 찾을 수 없습니다.');
+
+        // 값이 누락되어 들어오면 기존 DB에 저장되어 있던 원본 값 유지
+        const finalName = name || currentProduct.name;
+        const finalPrice = price || currentProduct.price;
+        const finalEmoji = emoji || currentProduct.emoji;
+        const finalDescription = (description !== undefined) ? description : currentProduct.description;
+        const finalImage = (image && image.trim() !== '') ? image : currentProduct.image; // 빈 값 유입 시 기존 파일명 사수
+        const finalStatus = status || currentProduct.status;
+
+        const query = `UPDATE products SET name=?, price=?, emoji=?, description=?, image=?, status=? WHERE id=?`;
+
+        db.run(query, [finalName, finalPrice, finalEmoji, finalDescription, finalImage, finalStatus, productId], (err) => {
+            if (err) return res.status(500).send('상품 정보 수정 실패');
+
+            // 관리대장 셀렉트 박스를 통한 비동기 JSON 요청인 경우 200 성공만 반환
+            if (req.headers['content-type'] === 'application/json') {
+                return res.sendStatus(200);
+            }
+
+            // 일반 폼 수정 요청인 경우 알림창 출력 후 리다이렉트
+            res.send('<script>alert("상품 정보가 수정되었습니다."); location.href="../../products";</script>');
+        });
     });
 });
 
@@ -126,7 +137,7 @@ router.post('/products/delete/:id', isAdmin, (req, res) => {
     });
 });
 
-// 전체 주문 내역 가져오기 (배송 완료된 주문은 리스트에서 제외)
+// 전체 주문 내역 가져오기
 router.get('/orders', isAdmin, (req, res) => {
     const query = `
         SELECT o.id AS orderId, o.total_price AS totalPrice, o.status, o.created_at AS createdAt, u.name AS userName
@@ -141,7 +152,7 @@ router.get('/orders', isAdmin, (req, res) => {
     });
 });
 
-// 주문 배송 단계 변경 처리
+// 주문 배송 단계 변경
 router.post('/orders/update-status', isAdmin, (req, res) => {
     const { orderId, currentStatus } = req.body;
     let nextStatus = '';
@@ -156,14 +167,8 @@ router.post('/orders/update-status', isAdmin, (req, res) => {
 
     db.run('UPDATE orders SET status = ? WHERE id = ?', [nextStatus, orderId], (err) => {
         if (err) return res.status(500).send('배송 상태 업데이트 실패');
-
-        res.send(`
-            <script>
-                alert('주문 상태가 [${nextStatus}] 상태로 변경되었습니다.');
-                location.href = '../orders';
-            </script>
-        `);
+        res.send(`<script>alert('주문 상태가 [${nextStatus}] 상태로 변경되었습니다.'); location.href = '../orders';</script>`);
     });
 });
 
-module.exports = router
+module.exports = router;
