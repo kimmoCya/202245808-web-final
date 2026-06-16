@@ -168,35 +168,65 @@
                     </tr>
                 <% }) %>
             <% } else { %>
-                <tr><td colspan="5" style="padding: 50px; color: #94a3b8; text-align: center; font-weight: 500;">진열된 음료 상품이 존재하지 않습니다.</td></tr>
+                <tr><td colspan="5" style="padding: 50px; color: #94a3b8; text-align: center; font-weight: 500;">진열된 음료 상품이 존재하지 않습니다. 🧊</td></tr>
             <% } %>
             </tbody>
         </table>
     </main>
+
     <footer>&copy; 2026 시스템 관리 센터. All rights reserved.</footer>
 </div>
 
 <script>
+    // 🌟 [서버/로컬 공용 비동기 상태 변경 교정 가드]
     function updateStatus(productId, selectElement) {
         const newStatus = selectElement.value;
         if(newStatus === '메인 추천 노출중') selectElement.classList.add('featured');
         else selectElement.classList.remove('featured');
 
-        // 경로 검증: fetch 내의 비동기 요청 경로가 절대경로가 아닌 상대경로 'products/edit/' 로 이상 없음 확인
+        const row = document.getElementById('row-' + productId);
+
+        // 테이블 행(tr) 내부 셀 인덱스 순서대로 텍스트 추출 완료
+        const name = row.children[1].innerText.trim();
+        // 원화 기호(₩)와 컴마(,) 텍스트 데이터를 정규식으로 지워서 완벽한 순수 숫자로 치환
+        const price = row.children[2].innerText.replace(/[^0-9]/g, '').trim();
+
+        // 목록 화면에 노출되지 않는 나머지 메타 데이터들은 백엔드 오류 방지용 빈값 세팅
+        const emoji = '';
+        const description = '';
+        const image = '';
+
         fetch('products/edit/' + productId, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: productId, status: newStatus })
+            body: JSON.stringify({
+                name: name,
+                price: price,
+                emoji: emoji,
+                description: description,
+                image: image,
+                status: newStatus
+            })
         })
             .then(res => {
-                if (!res.ok) { alert('상태 변경 실패'); location.reload(); }
+                // 백엔드가 스크립트 뭉텅이로 반환하더라도 HTTP 통신 자체가 200 OK 사인이 나면 성공 처리!
+                if (res.ok) {
+                    // 브라우저 팝업창 무한 도배현상을 방지하기 위해 alert는 가볍게 로그로 대체
+                    console.log('상품 진열 상태 속성 변경 정상 반영 완료!');
+                } else {
+                    alert('상태 변경 실패');
+                    location.reload();
+                }
             })
-            .catch(err => console.error('Error:', err));
+            .catch(err => {
+                console.error('Error:', err);
+                alert('네트워크 통신 오류 발생');
+                location.reload();
+            });
     }
 
     function deleteProduct(productId) {
         if (confirm('이 음료 상품을 대장에서 즉시 삭제하시겠습니까?')) {
-            // 경로 검증: fetch 내의 비동기 삭제 경로가 절대경로가 아닌 상대경로 'products/delete/' 로 이상 없음 확인
             fetch('products/delete/' + productId, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' }
